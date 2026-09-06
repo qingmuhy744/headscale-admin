@@ -111,10 +111,14 @@ sudo docker tag ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-1 qingmuhy744
 Compare the downloaded image identity and source revision with the published
 release before tagging or deploying it. For `hs-0.29.2-1`, the release index is
 `sha256:057b12c95ca0b5c1543c3b24ed6ddae1474ecd8d17600c59faeaea66278d0c3f`,
-the `linux/amd64` image ID is
+the `linux/amd64` manifest is
+`sha256:c334342f3651bf517c2b214b5f58e78a7dba039ded9cfadbf9c670aca78103ab`,
+its image configuration digest is
 `sha256:df928e4c0f675343ea4d7ba71ec35449653e3c03d16d06916ba1a205c67aca5c`,
 and `org.opencontainers.image.revision` must be
 `3880da885e74e3b9fdba302aecc5e09a22f6be9c`.
+Docker's containerd image store may report the release index digest as the local
+image ID, so compare the appropriate digest field along with the platform and revision.
 
 Back up the existing Compose file,
 record the old frontend image ID/digest, and tag the existing local image for rollback.
