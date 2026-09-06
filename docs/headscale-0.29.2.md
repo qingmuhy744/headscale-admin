@@ -92,22 +92,42 @@ should be immutable; use a new suffix for subsequent changes.
 
 ## Replace the server frontend
 
-For the configured mirror that resolves GitHub packages, use this short image name:
+Keep this short image name in the server's Compose file:
 
 ```yaml
 image: qingmuhy744/headscale-admin:hs-0.29.2-1
 ```
 
-Before changing Compose, pull the short name and compare its image identity and
-source revision with the published release. Back up the existing Compose file,
+The configured `docker.1ms.run` mirror returned `not found` when pulling this short
+name. Millisecond Mirror uses a separate `ghcr.1ms.run` endpoint for GitHub packages,
+as described in its [registry mapping documentation](https://mdoc.cc/mliev/1ms/v1.0.0/3).
+Pull through that domestic endpoint, then tag the same image with the short name:
+
+```sh
+sudo docker pull ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-1
+sudo docker tag ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-1 qingmuhy744/headscale-admin:hs-0.29.2-1
+```
+
+Compare the downloaded image identity and source revision with the published
+release before tagging or deploying it. For `hs-0.29.2-1`, the release index is
+`sha256:057b12c95ca0b5c1543c3b24ed6ddae1474ecd8d17600c59faeaea66278d0c3f`,
+the `linux/amd64` image ID is
+`sha256:df928e4c0f675343ea4d7ba71ec35449653e3c03d16d06916ba1a205c67aca5c`,
+and `org.opencontainers.image.revision` must be
+`3880da885e74e3b9fdba302aecc5e09a22f6be9c`.
+
+Back up the existing Compose file,
 record the old frontend image ID/digest, and tag the existing local image for rollback.
 Only change the `headscale-admin` image value; retain its existing `8000:80` port,
 network, restart policy and reverse proxy path.
 
 ```sh
-sudo docker compose -f /home/ubuntu/headscale/docker-compose.yaml pull headscale-admin
-sudo docker compose -f /home/ubuntu/headscale/docker-compose.yaml up -d --no-deps headscale-admin
+sudo docker compose -f /home/ubuntu/headscale/docker-compose.yaml up -d --no-deps --pull never headscale-admin
 ```
+
+For later releases, repeat the mirror pull, identity check and local tagging with
+the new immutable version tag. A Compose `pull` using only the short name does not
+select the mirror's GHCR endpoint.
 
 Validate `/admin/`, a directly loaded subpage, static assets, authentication and
 read-only users/nodes/routes/keys/policy requests through the existing HTTPS entry.
