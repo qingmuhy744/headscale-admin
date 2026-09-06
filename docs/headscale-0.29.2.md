@@ -79,6 +79,12 @@ git tag hs-0.29.2-1
 git push origin hs-0.29.2-1
 ```
 
+To retry publishing an existing tag without moving it:
+
+```sh
+gh workflow run docker-build.yml --ref main -f release_tag=hs-0.29.2-1
+```
+
 The artifact is `ghcr.io/qingmuhy744/headscale-admin:hs-0.29.2-1`.
 The package must be public for an unauthenticated mirror to fetch it.
 Record the release digest and source revision before deploying. Release tags

@@ -6,6 +6,13 @@ on:
     tags: ['hs-*']
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing release tag to verify and publish
+        required: true
+        default: hs-0.29.2-1
+        type: string
 
 permissions:
   contents: read
@@ -16,6 +23,8 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.release_tag && format('refs/tags/{0}', inputs.release_tag) || github.ref }}
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
@@ -32,7 +41,7 @@ jobs:
         run: npm run dev:down
 
   publish:
-    if: startsWith(github.ref, 'refs/tags/hs-')
+    if: startsWith(github.ref, 'refs/tags/hs-') || (github.event_name == 'workflow_dispatch' && startsWith(inputs.release_tag, 'hs-'))
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -41,6 +50,11 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.release_tag && format('refs/tags/{0}', inputs.release_tag) || github.ref }}
+      - name: Record source revision
+        id: source
+        run: echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
       - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
@@ -52,8 +66,8 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+          tags: ghcr.io/${{ github.repository }}:${{ inputs.release_tag || github.ref_name }}
           build-args: ENDPOINT=/admin
-          labels: org.opencontainers.image.revision=${{ github.sha }}
+          labels: org.opencontainers.image.revision=${{ steps.source.outputs.revision }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
