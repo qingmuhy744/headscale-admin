@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nodeBelongsToUser } from '$lib/common/types';
 	import type { ItemTypeName, Named } from '$lib/common/types';
 	import { getTypeName, isUser, isNode } from '$lib/common/types';
 
@@ -37,7 +38,7 @@
 				DrawerStore.close()
 			} else {
 				let msg = `Failed to Delete User "${name}" (${id}).`;
-				if(App.nodes.value.some((node) => node.user.id === item.id)){
+				if(App.nodes.value.some((node) => nodeBelongsToUser(node, item.id))){
 					msg += " Still has nodes."
 				}
 				toastError(msg, ToastStore);

@@ -5,6 +5,7 @@
 		getTimeDifference,
 		getTimeDifferenceColor,
 		toastSuccess,
+		toastError,
 	} from '$lib/common/funcs';
 
 	import { page } from '$app/state';
@@ -139,7 +140,10 @@
 							try {
 								await refreshApiKey();
 								settings.apiKey = App.apiKey.value;
-								saveSettings();
+								await saveSettings();
+							} catch (error) {
+								settings.apiKey = App.apiKey.value;
+								toastError('API key rotation failed', ToastStore, error);
 							} finally {
 								loading = false;
 							}

@@ -12,10 +12,11 @@ export type ApiError = {
 export type ApiResponse<T> = T | ApiError;
 
 function isApiError<T>(response: ApiResponse<T>): response is ApiError {
-	return (response as ApiError).code !== undefined;
+	return response != null && typeof (response as ApiError).code === 'number' && (response as ApiError).code !== 0;
 }
 
 async function toApiResponse<T>(response: Response): Promise<T> {
+	if (response.status === 401) throw new ApiAuthErrorUnauthorized();
 	if (!response.ok) {
 		const text = await response.text();
 		if (text === 'Unauthorized') {
@@ -38,7 +39,8 @@ async function toApiResponse<T>(response: Response): Promise<T> {
 		throw new Error('Unspecified Error: ' + text);
 	}
 
-	const data = await response.json();
+	const text = await response.text();
+	const data = text ? JSON.parse(text) : undefined;
 	if (isApiError(data)) {
 		throw new Error(data.message);
 	}
@@ -47,13 +49,11 @@ async function toApiResponse<T>(response: Response): Promise<T> {
 }
 
 function headers(): { headers: HeadersInit } {
-	if (typeof window === 'undefined') {
-		return { headers: {} };
-	}
 	return {
 		headers: {
 			Authorization: 'Bearer ' + App.apiKey.value,
 			Accept: 'application/json',
+			'Content-Type': 'application/json',
 		},
 	};
 }
@@ -63,17 +63,21 @@ export function toUrl(path: string): string {
 }
 
 async function apiFetch<T>(path: string, init?: RequestInit, verbose: boolean = false): Promise<T> {
+	const requestHeaders = new Headers(headers().headers);
+	new Headers(init?.headers).forEach((value, name) => requestHeaders.set(name, value));
+	const usesCurrentKey = () => requestHeaders.get('Authorization') === `Bearer ${App.apiKey.value}`;
 	try {
-		const response = await fetch(toUrl(path), { ...headers(), ...init });
+		const response = await fetch(toUrl(path), { ...init, headers: requestHeaders });
 		if (verbose) {
 			debug(response);
 		}
 		const apiResponse = await toApiResponse<T>(response);
-		if (App.apiKeyInfo.value.authorized === null) {
+		if (usesCurrentKey() && App.apiKeyInfo.value.authorized === null) {
 			App.apiKeyInfo.value.authorized = true
 		}
 		return apiResponse;
 	} catch (err) {
+		if (usesCurrentKey() && err instanceof ApiAuthErrorUnauthorized) App.apiKeyInfo.value.authorized = false;
 		if (err instanceof Error) {
 			debug('Fetch Error:', err.message);
 		}
@@ -111,8 +115,4 @@ export async function apiPut<T>(
 ): Promise<T> {
 	const body = JSON.stringify(data ?? {});
 	return await apiFetch<T>(path, { method: 'PUT', body, ...init }, verbose);
-}
-
-export async function apiTest(): Promise<boolean> {
-	return true;
 }

@@ -1,0 +1,10 @@
+# Static public relay entry keeps API tests independent of DERP-map downloads.
+regions:
+  1:
+    regionid: 1
+    regioncode: nyc
+    regionname: New York City
+    nodes:
+      - name: 1a
+        regionid: 1
+        hostname: derp1.tailscale.com

@@ -1,0 +1,113 @@
+# Headscale v0.29.2 compatibility fork
+
+Target: Headscale `v0.29.2`, commit `8eea89488c642f3d5f617fab5493d5f51f6f4ad0`.
+The local backend image is pinned to the same release digest as the inspected server:
+`sha256:d337f1be4a9155b330aa9077bf6c82d24ff0581b8e69390ebc6d7c623bb339ce`.
+The frontend starts from upstream commit `214a44a9c15c92d2b42383f131b51df10c84017c`.
+
+## Compatibility changes
+
+| Area | v0.29.2 behavior in this fork |
+| --- | --- |
+| Nodes | Uses `tags`, handles nullable and synthetic owners, and excludes tagged devices from user counts. |
+| Ownership | Removes the deleted node/user transfer operation. Assigning initial tags requires confirmation because ownership conversion is permanent. |
+| Pre-auth keys | Lists all keys once, including tag-owned keys. Expiration and deletion use the key ID. |
+| Key creation | Supports user-owned or tag-owned keys. Complete secrets are shown only in the creation dialog; masked list values cannot be copied as auth secrets. |
+| Deployment commands | Accepts a complete key entered by the user. Does not select masked values from the key list or persist entered secrets as defaults. |
+| API key rotation | Matches masked prefixes, verifies the replacement, switches credentials, then expires the old key by ID. Reports failed revocation. |
+| Routes | Uses node `approve_routes` with the complete approved prefix set. |
+| ACL | Preserves `grants`, `autoApprovers`, `nodeAttrs`, `tests`, SSH check options and other fields. Does not introduce an empty `acls` field into grants-only policies. |
+| Policy users | Formats local users with the required `@` suffix, and uses OIDC email identifiers in groups, tag owners, ACLs and SSH rules. |
+| ACL validation | Checks the policy before saving, guards advanced references, and blocks editing after initial load failure. An explicitly missing policy has a separate Create policy action. |
+
+Visual editors cover the existing groups, tag owners, hosts, ACLs and SSH sections.
+Advanced fields remain available in Config. JSON formatting normalizes whitespace and
+does not retain HuJSON comments. Saving policies requires Headscale database policy mode.
+
+## Local acceptance
+
+Requirements: Node.js 22 or newer and Docker Compose. On macOS, browser tests use
+installed Google Chrome; on Linux, run `npx playwright install --with-deps chromium`.
+Set `PLAYWRIGHT_CHANNEL` to override the browser channel.
+
+```sh
+npm ci
+npm run dev:up
+```
+
+Open `http://127.0.0.1:18080/admin/`. In Settings, set API URL to
+`http://127.0.0.1:18080` and use `TEST_API_KEY` from the local `dev/.env` file.
+That file is ignored by Git and contains only disposable test credentials.
+
+The command starts an isolated Headscale server, two users, two Tailscale clients
+(one user-owned and one tagged), and the built frontend. Clients use userspace
+networking, with no privileged containers, TUN device or production configuration.
+The fixture includes subnet/exit advertisements and a grants-only policy with
+advanced fields. No production accounts, database, keys or DERP configuration are copied.
+
+```sh
+npm run check
+npm run test:unit
+npm run test:integration
+npm run test:e2e
+```
+
+- Unit tests cover request formats, authentication failures, key rotation failures, ownership and policy preservation.
+- Integration tests call the real local v0.29.2 API for users, keys, node registration/tags/expiry, route approval and policy saves.
+- Browser tests exercise authentication, views, key lifecycle, tags/routes, policy failures and rotation at desktop and mobile sizes.
+- Route tests verify control-plane advertisements and approval state. They do not certify forwarding to a real subnet or through an exit node.
+
+`test:integration` is explicitly gated and its target is fixed to the local test stack.
+Screenshots and browser output are written to ignored `test-results/`.
+Re-running `dev:up` restores the fixture policy and refreshes expired test credentials.
+
+```sh
+npm run dev:down
+```
+
+This stops the test stack while retaining its named volumes. To remove only this
+stack's data, use `docker compose -f dev/compose.yaml --profile ui --profile clients down -v`.
+
+## Publish to GHCR
+
+The workflow uses the repository's `GITHUB_TOKEN` with `packages: write`.
+It runs checks, unit tests, a real backend and browser tests before publishing.
+Push a version tag to publish both `linux/amd64` and `linux/arm64`:
+
+```sh
+git tag hs-0.29.2-1
+git push origin hs-0.29.2-1
+```
+
+The artifact is `ghcr.io/qingmuhy744/headscale-admin:hs-0.29.2-1`.
+The package must be public for an unauthenticated mirror to fetch it.
+Record the release digest and source revision before deploying. Release tags
+should be immutable; use a new suffix for subsequent changes.
+
+## Replace the server frontend
+
+For the configured mirror that resolves GitHub packages, use this short image name:
+
+```yaml
+image: qingmuhy744/headscale-admin:hs-0.29.2-1
+```
+
+Before changing Compose, pull the short name and compare its image identity and
+source revision with the published release. Back up the existing Compose file,
+record the old frontend image ID/digest, and tag the existing local image for rollback.
+Only change the `headscale-admin` image value; retain its existing `8000:80` port,
+network, restart policy and reverse proxy path.
+
+```sh
+sudo docker compose -f /home/ubuntu/headscale/docker-compose.yaml pull headscale-admin
+sudo docker compose -f /home/ubuntu/headscale/docker-compose.yaml up -d --no-deps headscale-admin
+```
+
+Validate `/admin/`, a directly loaded subpage, static assets, authentication and
+read-only users/nodes/routes/keys/policy requests through the existing HTTPS entry.
+Confirm the backend container identity and start time did not change.
+
+To roll back, restore the backed-up Compose file and use the recorded local rollback
+image (or immutable old digest), then recreate only `headscale-admin` with
+`up -d --no-deps --pull never headscale-admin`. Recheck the entry and backend identity.
+Do not run a stack-wide `down`, remove volumes or recreate Headscale during frontend replacement.

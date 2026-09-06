@@ -4,6 +4,7 @@ import IPAddr from 'ipaddr.js';
 import { debug } from './debug';
 import DOMPurify from 'dompurify';
 import type { Direction, Node, OnlineStatus, User } from './types';
+import { nodeBelongsToUser } from './types';
 import { App } from '$lib/States.svelte';
 
 export function clone<T>(item: T): T {
@@ -49,7 +50,7 @@ const DurationInfinite = new Date(DurationInfiniteString);
 const ExpirationColorFuture = 'text-success-800 dark:text-success-400';
 const ExpirationColorPast = 'text-error-600 dark:text-error-400';
 
-export function isExpired(expiry: string): boolean {
+export function isExpired(expiry: string | null | undefined): boolean {
 	const date = new Date(expiry ?? DurationInfiniteString);
 	const now = new Date();
 	if (date.getTime() == DurationInfinite.getTime()) {
@@ -183,16 +184,15 @@ export function toastWarning(message: string, toastStore: ToastStore) {
 	});
 }
 
-export function toastError(message: string, toastStore: ToastStore, error?: Error) {
-	message = DOMPurify.sanitize(message)
+export function toastError(message: string, toastStore: ToastStore, error?: unknown) {
 	if (error !== undefined) {
 		if (message.length > 0) {
 			message += ': ';
 		}
-		message += error.message;
+		message += error instanceof Error ? error.message : String(error);
 	}
 	toastStore.trigger({
-		message,
+		message: DOMPurify.sanitize(message),
 		background: 'variant-filled-error',
 	});
 }
@@ -371,8 +371,8 @@ export function getSortedNodes(nodes: Node[], sortMethod: string, sortDirection:
 export function filterUser(user: User, filterString: string, onlineStatus: OnlineStatus = "all"): boolean {
 	try {
 		if (
-			(onlineStatus === 'online' && !App.nodes.value.filter((n) => n.user.id === user.id).some((n) => n.online)) ||
-			(onlineStatus === 'offline' && App.nodes.value.filter((n) => n.user.id === user.id).some((n) => n.online))
+			(onlineStatus === 'online' && !App.nodes.value.filter((n) => nodeBelongsToUser(n, user.id)).some((n) => n.online)) ||
+			(onlineStatus === 'offline' && App.nodes.value.filter((n) => nodeBelongsToUser(n, user.id)).some((n) => n.online))
 		) {
 			return false;
 		}
@@ -408,8 +408,7 @@ export function filterNode(node: Node, filterString: string, onlineStatus: Onlin
 		return (
 			r.test(node.name) ||
 			r.test(node.givenName) ||
-			node.forcedTags.map(getTag).some((tag) => r.test(tag)) ||
-			node.validTags.map(getTag).some((tag) => r.test(tag))
+			node.tags.map(getTag).some((tag) => r.test(tag))
 		);
 	} catch (err) {
 		return true;

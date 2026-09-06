@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getPolicyUser } from '$lib/common/types';
 	import type { ACLBuilder } from '$lib/common/acl.svelte';
 	import ListEntry from './ListEntry.svelte';
 	import CardListContainer from '$lib/cards/CardListContainer.svelte';
@@ -25,9 +26,7 @@
 	let {acl = $bindable(), groupName, open = $bindable()}: GroupListCardProps = $props()
 
 	const groupMembers = $derived(acl.getGroupMembers(groupName));
-	const userNames = $derived(App.users.value.map((u) => {
-		return u.email ? u.email : u.name;
-	}).toSorted())
+	const userNames = $derived(App.users.value.map(getPolicyUser).toSorted())
 
 	let group = $state(makeGroup());
 	let groupNameNew = $state('');

@@ -1,0 +1,68 @@
+name: headscale-admin-test
+
+services:
+  headscale:
+    image: headscale/headscale:0.29.2@sha256:d337f1be4a9155b330aa9077bf6c82d24ff0581b8e69390ebc6d7c623bb339ce
+    command: serve
+    volumes:
+      - ./headscale.yaml:/etc/headscale/config.yaml:ro
+      - ./derp.yaml:/etc/headscale/derp.yaml:ro
+      - headscale-data:/var/lib/headscale
+    ports:
+      - "127.0.0.1:18081:8080"
+    healthcheck:
+      test: ["CMD", "headscale", "users", "list"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  admin:
+    profiles: ["ui"]
+    image: headscale-admin:test
+    build:
+      context: ..
+      args:
+        ENDPOINT: /admin
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    ports:
+      - "127.0.0.1:18080:80"
+    depends_on:
+      headscale:
+        condition: service_healthy
+
+  user-node:
+    profiles: [clients]
+    image: tailscale/tailscale:v1.86.5@sha256:9e2bfdd9e2ce724df53f976d06a4a9933aa730dc655ace42798f4c73735d1cac
+    environment:
+      TS_AUTHKEY: ${TEST_USER_AUTHKEY:-}
+      TS_HOSTNAME: test-user
+      TS_USERSPACE: "true"
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_AUTH_ONCE: "true"
+      TS_EXTRA_ARGS: --login-server=http://headscale:8080 --accept-dns=false
+    volumes:
+      - user-node-data:/var/lib/tailscale
+    depends_on:
+      headscale:
+        condition: service_healthy
+  router-node:
+    profiles: [clients]
+    image: tailscale/tailscale:v1.86.5@sha256:9e2bfdd9e2ce724df53f976d06a4a9933aa730dc655ace42798f4c73735d1cac
+    environment:
+      TS_AUTHKEY: ${TEST_ROUTER_AUTHKEY:-}
+      TS_HOSTNAME: test-router
+      TS_USERSPACE: "true"
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_AUTH_ONCE: "true"
+      TS_EXTRA_ARGS: --login-server=http://headscale:8080 --accept-dns=false --advertise-routes=10.77.0.0/24,10.78.0.0/24 --advertise-exit-node
+    volumes:
+      - router-node-data:/var/lib/tailscale
+    depends_on:
+      headscale:
+        condition: service_healthy
+
+volumes:
+  headscale-data:
+  user-node-data:
+  router-node-data:

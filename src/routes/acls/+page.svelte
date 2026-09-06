@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { TabGroup, getToastStore } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
-	import JWCC from 'json5'
 	import RawMdiCodeJSON from '~icons/mdi/code-json';
 	import RawMdiConsole from '~icons/mdi/console';
 	import RawMdiDevices from '~icons/mdi/devices';
 	import RawMdiGroups from '~icons/mdi/account-group';
 	import RawMdiSecurity from '~icons/mdi/security';
 	import RawMdiTag from '~icons/mdi/tag';
+	import RawMdiRefresh from '~icons/mdi/refresh';
+	import RawMdiPlus from '~icons/mdi/plus';
 
-	import { ACLBuilder, type ACL } from '$lib/common/acl.svelte';
-	import { debug } from '$lib/common/debug';
+	import { ACLBuilder } from '$lib/common/acl.svelte';
 	import { getPolicy } from '$lib/common/api';
 	import { toastError } from '$lib/common/funcs';
 	import Page from '$lib/page/Page.svelte';
@@ -28,9 +28,12 @@
 
 	let acl = $state(ACLBuilder.defaultACL());
 	let loading = $state(false)
+	let loaded = $state(false)
+	let loadError = $state('')
+	let noPolicy = $state(false)
 
 	// Navigation tabs
-	let tabSet: number = $state(0);
+	let tabSet: number = $state(5);
 	const tabs = [
 		{ name: 'groups', title: 'Groups', logo: RawMdiGroups },
 		{ name: 'tag-owners', title: 'Tag Owners', logo: RawMdiTag },
@@ -40,18 +43,46 @@
 		{ name: 'config', title: 'Config', logo: RawMdiCodeJSON },
 	];
 
-	onMount(() => {
-		getPolicy().then(policy => {
-			acl = ACLBuilder.fromPolicy(JWCC.parse<ACL>(policy))
-		}).catch(reason => {
-			debug("failed to get policy:", reason)
-			toastError(`Unable to get policy from server.`, ToastStore, reason)
-		})
-	});
+	async function loadPolicy() {
+		loading = true
+		loadError = ''
+		noPolicy = false
+		try {
+			const policy = await getPolicy()
+			if (!policy.trim()) { noPolicy = true; return }
+			acl = ACLBuilder.fromPolicy(policy)
+			loaded = true
+		} catch (error) {
+			loadError = error instanceof Error ? error.message : String(error)
+			noPolicy = loadError === 'loading ACL from database: acl policy not found'
+			if (!noPolicy) toastError('Unable to load policy', ToastStore, error)
+		} finally {
+			loading = false
+		}
+	}
+	onMount(() => { void loadPolicy() });
 </script>
 
 <Page>
 	<PageHeader title="ACL Builder" />
+	{#if !loaded}
+		<div class="p-4 space-y-3" role="status">
+			{#if loading}
+				<p>Loading policy...</p>
+			{:else if noPolicy}
+				<p>No policy configured.</p>
+				<button type="button" class="btn btn-sm variant-filled-secondary" onclick={() => {
+					acl = ACLBuilder.defaultACL()
+					loaded = true
+				}}><RawMdiPlus /> Create policy</button>
+			{:else}
+				<p class="text-error-500 break-words">{loadError}</p>
+				<button type="button" class="btn btn-sm variant-filled-secondary" onclick={loadPolicy}>
+					<RawMdiRefresh /> Retry
+				</button>
+			{/if}
+		</div>
+	{:else}
 	<TabGroup
 		justify="justify-left"
 		active="variant-filled-secondary"
@@ -61,7 +92,7 @@
 		border=""
 		class="bg-surface-100-800-token w-full px-2 py-2"
 	>
-		<div class="flex text-center">
+		<div class="flex text-center overflow-x-auto">
 			<Tabbed {tabs} bind:tabSet />
 		</div>
 		<svelte:fragment slot="panel">
@@ -80,4 +111,5 @@
 			{/if}
 		</svelte:fragment>
 	</TabGroup>
+	{/if}
 </Page>

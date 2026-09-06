@@ -35,6 +35,7 @@ export const HAMetaDefault = {
 }
 
 export type AclPolicy = {
+    [key: string]: unknown,
     "#ha-meta"?: HAMeta,
     action: 'accept',
     proto?: string,
@@ -42,17 +43,21 @@ export type AclPolicy = {
     dst: string[],
 }
 export type AclSshRule = {
-    action: 'accept',
+    [key: string]: unknown,
+    action: 'accept' | 'check',
+    checkPeriod?: string,
+    acceptEnv?: string[],
     src: string[],
     dst: string[],
     users: string[],
 }
 
 export type ACL = {
-    groups: AclGroups, // keys must start with "group:"
-    tagOwners: AclTagOwners, // keys must start with "tag:"
-    hosts: AclHosts, // keys are DNS-style hostnames
-    acls: AclPolicies,
+    [key: string]: unknown,
+    groups?: AclGroups,
+    tagOwners?: AclTagOwners,
+    hosts?: AclHosts,
+    acls?: AclPolicies,
     ssh?: AclSshRules,
 }
 
@@ -67,12 +72,14 @@ const RegexGroupName = /^[a-z0-9-\.]+$/
 const RegexTagName = /^[^\s:]+$/
 const RegexHostName = /^[a-z0-9-\.]+$/
 
-export class ACLBuilder implements ACL {
+export class ACLBuilder {
     groups = $state<AclGroups>({})
     tagOwners = $state<AclTagOwners>({})
     hosts = $state<AclHosts>({})
     acls = $state<AclPolicies>([])
     ssh = $state<AclSshRules|undefined>(undefined)
+    private extra = $state<Record<string, unknown>>({})
+    private presentFields: Set<string>
 
     constructor(
         groups: AclGroups,
@@ -80,22 +87,33 @@ export class ACLBuilder implements ACL {
         hosts: AclHosts,
         acls: AclPolicies,
         ssh?: AclSshRules,
+        extra: Record<string, unknown> = {},
+        presentFields = ['groups', 'tagOwners', 'hosts', 'acls', 'ssh'],
     ) {
         this.groups = groups
         this.tagOwners = tagOwners
         this.hosts = hosts
         this.acls = acls
         this.ssh = ssh
+        this.extra = extra
+        this.presentFields = new Set(presentFields)
     }
 
     JSON(space: number = 0): string {
-        return JSON.stringify({
+        const editable = {
             groups: this.groups,
             tagOwners: this.tagOwners,
             hosts: this.hosts,
             acls: this.acls,
             ssh: this.ssh,
-        }, null, space)
+        }
+        const policy: ACL = { ...this.extra }
+        for (const [field, value] of Object.entries(editable)) {
+            if (this.presentFields.has(field) || (value && Object.keys(value).length > 0)) {
+                policy[field] = value
+            }
+        }
+        return JSON.stringify(policy, null, space)
     }
 
     static emptyACL(): ACLBuilder {
@@ -123,15 +141,38 @@ export class ACLBuilder implements ACL {
             return this.fromPolicy(JWCC.parse<ACL>(acl))
         }
 
-        const ssh = acl.ssh ? [...acl.ssh] : []
+        if (!acl || typeof acl !== 'object' || Array.isArray(acl)) {
+            throw new Error('Policy must be a JSON object')
+        }
+        for (const field of ['acls', 'ssh'] as const) {
+            if (acl[field] !== undefined && !Array.isArray(acl[field])) throw new Error(`${field} must be an array`)
+        }
+        for (const field of ['groups', 'hosts', 'tagOwners'] as const) {
+            if (acl[field] !== undefined && (!acl[field] || typeof acl[field] !== 'object' || Array.isArray(acl[field]))) {
+                throw new Error(`${field} must be an object`)
+            }
+        }
+        const { groups, tagOwners, hosts, acls, ssh, ...extra } = JSON.parse(JSON.stringify(acl)) as ACL
 
         return new ACLBuilder(
-            {...acl.groups},
-            {...acl.tagOwners},
-            {...acl.hosts},
-            [...acl.acls],
-            [...ssh],
+            groups || {},
+            tagOwners || {},
+            hosts || {},
+            acls || [],
+            ssh,
+            extra,
+            Object.keys(acl),
         )
+    }
+
+    private assertNoAdvancedReferences(alias: string) {
+        const references = (value: unknown): boolean => {
+            if (typeof value === 'string') return value === alias || value.startsWith(alias + ':')
+            if (Array.isArray(value)) return value.some(references)
+            if (value && typeof value === 'object') return Object.entries(value).some(([key, child]) => references(key) || references(child))
+            return false
+        }
+        if (references(this.extra)) throw new Error(`Advanced policy fields still reference ${alias}`)
     }
 
     private static getPrefix(name: string): PrefixType | null {
@@ -214,7 +255,7 @@ export class ACLBuilder implements ACL {
 
     // deep clone of current ACL
     clone(): ACLBuilder {
-        return JSON.parse(JSON.stringify(this)) as ACLBuilder
+        return ACLBuilder.fromPolicy(this.JSON())
     }
 
     /*
@@ -249,6 +290,7 @@ export class ACLBuilder implements ACL {
     }
 
     renameHost(nameOld: string, nameNew: string) {
+        this.assertNoAdvancedReferences(nameOld)
         nameOld = ACLBuilder.validateHostName(nameOld)
         nameNew = ACLBuilder.validateHostName(nameNew)
         if (this.hosts[nameOld] === undefined) {
@@ -268,6 +310,10 @@ export class ACLBuilder implements ACL {
             acl.src = acl.src.map(src => (src === nameOld ? nameNew : src))
             acl.dst = acl.dst.map(dst => (ACLBuilder.getPolicyDstHost(dst) === nameOld ? nameNew + ":" + ACLBuilder.getPolicyDstPorts(dst) : dst))
         })
+        this.ssh?.forEach(rule => {
+            rule.src = rule.src.map(src => src === nameOld ? nameNew : src)
+            rule.dst = rule.dst.map(dst => dst === nameOld ? nameNew : dst)
+        })
     }
 
     getHostNames(): string[] {
@@ -279,6 +325,7 @@ export class ACLBuilder implements ACL {
     }
 
     deleteHost(name: string) {
+        this.assertNoAdvancedReferences(name)
         if (this.hosts[name] === undefined) {
             throw new Error(`Host '${name}' doesn't exist`)
         }
@@ -288,7 +335,7 @@ export class ACLBuilder implements ACL {
         // delete host from ACLs
         for (const acl of this.acls) {
             acl.src = acl.src.filter(s => s !== name)
-            acl.dst = acl.dst.filter(d => d !== name)
+            acl.dst = acl.dst.filter(d => ACLBuilder.getPolicyDstHost(d) !== name)
         }
 
         // remove group from SSH
@@ -321,6 +368,7 @@ export class ACLBuilder implements ACL {
     }
 
     renameTag(nameOld: string, nameNew: string) {
+        this.assertNoAdvancedReferences(ACLBuilder.normalizeTag(nameOld).prefixed)
         nameNew = ACLBuilder.validateTagName(nameNew)
         const { prefixed: prefixedNew } = ACLBuilder.normalizePrefix(nameNew, 'tag')
         const { stripped: strippedOld, prefixed: prefixedOld } = ACLBuilder.normalizePrefix(nameOld, 'tag')
@@ -407,6 +455,7 @@ export class ACLBuilder implements ACL {
     }
 
     deleteTag(name: string) {
+        this.assertNoAdvancedReferences(ACLBuilder.normalizeTag(name).prefixed)
         const { stripped, prefixed } = ACLBuilder.normalizePrefix(name, 'tag')
 
         if (this.tagOwners[prefixed] === undefined) {
@@ -416,7 +465,7 @@ export class ACLBuilder implements ACL {
         // remove tag from ACLs
         for (const acl of this.acls){
             acl.src = acl.src.filter(s => s !== prefixed);
-            acl.dst = acl.dst.filter(d => d !== prefixed);
+            acl.dst = acl.dst.filter(d => ACLBuilder.getPolicyDstHost(d) !== prefixed);
         }
 
         // remove tag from SSH
@@ -454,6 +503,7 @@ export class ACLBuilder implements ACL {
     }
 
     renameGroup(nameOld: string, nameNew: string) {
+        this.assertNoAdvancedReferences(ACLBuilder.normalizeGroup(nameOld).prefixed)
         nameNew = ACLBuilder.validateGroupName(nameNew)
         const { prefixed: prefixedNew } = ACLBuilder.normalizePrefix(nameNew, 'group')
         const { stripped: strippedOld, prefixed: prefixedOld } = ACLBuilder.normalizePrefix(nameOld, 'group')
@@ -522,6 +572,7 @@ export class ACLBuilder implements ACL {
     }
 
     deleteGroup(name: string) {
+        this.assertNoAdvancedReferences(ACLBuilder.normalizeGroup(name).prefixed)
         const { stripped, prefixed } = ACLBuilder.normalizePrefix(name, 'group')
 
         // verify group's existence
@@ -537,13 +588,14 @@ export class ACLBuilder implements ACL {
         // remove group from ACLs
         for (const acl of this.acls) {
             acl.src = acl.src.filter(s => s !== prefixed)
-            acl.dst = acl.dst.filter(d => d !== prefixed)
+            acl.dst = acl.dst.filter(d => ACLBuilder.getPolicyDstHost(d) !== prefixed)
         }
 
         // remove group from SSH policies
         if (this.ssh !== undefined){
             for (const ssh of this.ssh) {
                 ssh.src = ssh.src.filter(s => s !== prefixed)
+                ssh.dst = ssh.dst.filter(d => d !== prefixed)
             }
         }
 
@@ -634,6 +686,8 @@ export class ACLBuilder implements ACL {
     setPolicy(idx: number, policy: AclPolicy) {
         this.validatePolicyIndex(idx)
         this.acls[idx] = {
+            ...this.acls[idx],
+            ...policy,
             action: policy.action,
             proto: policy.proto,
             src: policy.src,
@@ -726,6 +780,8 @@ export class ACLBuilder implements ACL {
         this.validateSshRuleIndex(idx)
         if (this.ssh !== undefined) {
             this.ssh[idx] = {
+                ...this.ssh[idx],
+                ...rule,
                 action: rule.action,
                 src: rule.src,
                 dst: rule.dst,

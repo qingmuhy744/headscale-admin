@@ -71,12 +71,7 @@
 														break;
 													}
 												}
-												for (let i = 0; i < App.preAuthKeys.value.length; i++) {
-													if (App.preAuthKeys.value[i].user.name === oldName) {
-														App.preAuthKeys.value[i].user.name = u.name;
-														break;
-													}
-												}
+												await Promise.all([App.populatePreAuthKeys(), App.populateNodes()]);
 											}
 										case 'node':
 											if(newName === ''){

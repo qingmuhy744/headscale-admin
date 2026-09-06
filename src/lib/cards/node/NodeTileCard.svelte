@@ -64,8 +64,10 @@
 	</CardTileEntry>
 	<CardTileEntry title="User:">
 		<div class="flex flex-row gap-3 items-center">
-			{node.user.name}
-			<OnlineUserIndicator bind:user={node.user} />
+			{node.tags.length ? 'Tagged device' : node.user?.name || 'Unassigned'}
+			{#if node.tags.length === 0 && node.user}
+				<OnlineUserIndicator user={node.user} />
+			{/if}
 		</div>
 	</CardTileEntry>
 	<CardTileEntry title="IPv4 Address:">

@@ -19,7 +19,8 @@
 	let loading = $state(false);
 	const ToastStore = getToastStore();
 
-	async function newNode() {
+	async function newNode(event: SubmitEvent) {
+		event.preventDefault();
 		if (nodekey == '' || username == '') {
 			toastError('Username and Device Key are Required', ToastStore);
 			return;
@@ -54,7 +55,7 @@
 		<input
 			class="input rounded-md w-full md:w-1/2 lg:w-1/3"
 			type="text"
-			placeholder="Device Key..."
+			placeholder="Registration key (hskey-authreq-...)"
 			disabled={loading}
 			bind:value={nodekey}
 			use:focus

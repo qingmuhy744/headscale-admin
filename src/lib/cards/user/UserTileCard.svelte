@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nodeBelongsToUser } from '$lib/common/types';
 	import { xxHash32 } from 'js-xxhash';
 	import { type User, type Node, getUserDisplay } from '$lib/common/types';
 	import { dateToStr, openDrawer } from '$lib/common/funcs';
@@ -12,7 +13,7 @@
 	}
 	let { user = $bindable() }: UserTileCardProps = $props()
 
-	const nodeCount = $derived(App.nodes.value.filter((n) => n.user.id === user.id).length);
+	const nodeCount = $derived(App.nodes.value.filter((n) => nodeBelongsToUser(n, user.id)).length);
 	const drawerStore = getDrawerStore();
 	const color = $derived(
 		(xxHash32(user.id + ':' + user.name, 0xbeefbabe) & 0xff_ff_ff)

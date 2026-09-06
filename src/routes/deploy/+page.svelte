@@ -6,11 +6,13 @@
 		isValidTag,
 		toastError,
 		toastSuccess,
+		clone,
 	} from '$lib/common/funcs';
 	import DeployCheck from './DeployCheck.svelte';
 	import Page from '$lib/page/Page.svelte';
 	import PageHeader from '$lib/page/PageHeader.svelte';
 	import type { Deployment, PreAuthKey } from '$lib/common/types';
+	import { hasKeySecret } from '$lib/common/types';
 	import { InputChip, getToastStore } from '@skeletonlabs/skeleton';
 	import { page } from '$app/state';
 	import { slide } from 'svelte/transition';
@@ -19,14 +21,9 @@
 
 	const ToastStore = getToastStore();
 
-	function createFilter(user_id: string) {
-		return (pak: PreAuthKey) => {
-			return pak.user.id === user_id && !(pak.used && !pak.reusable) && !isExpired(pak.expiration);
-		};
-	}
-
 	// $: deployment = defaultDeployment();
-	let deployment: Deployment = $state(App.deploymentDefaults.value);
+	let deployment: Deployment = $state({ ...clone(App.deploymentDefaults.value), preAuthKey: '', preAuthKeyUser: '' });
+	const invalidKey = $derived(deployment.usePreAuthKey && !hasKeySecret(deployment.preAuthKey));
 
 	let craftCommand = (d: Deployment) => {
 		const cmd = ['tailscale up --login-server=' + (App.apiUrl.value || page.url.origin)];
@@ -38,7 +35,7 @@
 		d.operator && d.operatorValue != '' && cmd.push('--operator=' + d.operatorValue);
 		d.forceReauth && cmd.push('--force-reauth');
 		d.sshServer && cmd.push('--ssh');
-		d.usePreAuthKey && d.preAuthKey !== '' && cmd.push('--auth-key=' + d.preAuthKey);
+		d.usePreAuthKey && hasKeySecret(d.preAuthKey) && cmd.push('--auth-key=' + d.preAuthKey);
 		d.unattended && cmd.push('--unattended')
 
 		// advertise
@@ -67,10 +64,11 @@
 	<PageHeader title="Deploy" buttonText={''} show={true}>
 		{#snippet button()}
 			<button
-				class="bg-gray-400/30 dark:bg-gray-800/70 border border-dashed border-slate-200 border-1 pr-0 pl-4 rounded-lg justify-start text-left w-[90%]"
+				disabled={invalidKey}
+				class="bg-gray-400/30 dark:bg-gray-800/70 border border-dashed border-slate-200 border-1 px-4 rounded-lg justify-start text-left w-full disabled:opacity-50"
 				onclick={() =>
 					copyToClipboard(craftCommand(deployment), ToastStore, 'Copied Command to Clipboard!')}
-				><code class="text-black dark:text-white text-sm block py-4 w-full"
+				><code class="text-black dark:text-white text-sm block py-4 w-full break-all"
 					>{craftCommand(deployment)}</code
 				>
 			</button>
@@ -117,23 +115,10 @@
 			help="A generated key to automatically authenticate the node for a given user"
 		>
 			<div class="flex flex-col gap-2">
-				<select bind:value={deployment.preAuthKeyUser} class="input rounded-md">
-					<option value=""></option>
-					{#each App.users.value as user}
-						<option value={user.id}>{user.name}</option>
-					{/each}
-				</select>
-				{#if deployment.preAuthKeyUser}
-					<div transition:slide>
-						<select bind:value={deployment.preAuthKey} class="input rounded-md">
-							<option value=""
-								>{App.preAuthKeys.value.filter(createFilter(deployment.preAuthKeyUser)).length} Valid Key(s)</option
-							>
-							{#each App.preAuthKeys.value.filter(createFilter(deployment.preAuthKeyUser)) as preAuthKey}
-								<option value={preAuthKey.key}>{preAuthKey.key}</option>
-							{/each}
-						</select>
-					</div>
+				<input type="password" class="input rounded-md" aria-label="Complete pre-auth key"
+					autocomplete="off" placeholder="hskey-auth-..." bind:value={deployment.preAuthKey} />
+				{#if invalidKey}
+					<p class="text-sm text-error-500">A complete pre-auth key is required.</p>
 				{/if}
 			</div>
 		</DeployCheck>

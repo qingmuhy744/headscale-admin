@@ -5,7 +5,8 @@
 	import RawMdiToggleSwitchOn from '~icons/mdi/toggle-switch';
 	import RawMdiToggleSwitchOff from '~icons/mdi/toggle-switch-off';
 	// import Delete from '$lib/parts/Delete.svelte';
-	import { isExpired } from '$lib/common/funcs';
+	import { isExpired, toastError } from '$lib/common/funcs';
+	import { getToastStore } from '@skeletonlabs/skeleton';
 	import { debug } from '$lib/common/debug';
 	import { App } from '$lib/States.svelte';
 
@@ -26,6 +27,7 @@
 	const approved = $derived(node.approvedRoutes.includes(route));
 	const available = $derived(node.availableRoutes.includes(route));
 	const subnet = $derived(node.subnetRoutes.includes(route));
+	const toastStore = getToastStore();
 
 	// component is disabled
 	const disabled = $derived(
@@ -43,6 +45,9 @@
 <div class="flex flex-row col-span-6 text-end items-center justify-end">
 	<button
 		type="button"
+		aria-label="{approved ? 'Revoke' : 'Approve'} route {route}"
+		title="{approved ? 'Revoke' : 'Approve'} route {route}"
+		aria-pressed={approved}
 		{disabled}
 		class="btn {approved
 			? 'text-success-700 dark:text-success-400'
@@ -56,7 +61,7 @@
 					await enableRoutes(node, route);
 				}
 			} catch (error) {
-				debug(error);
+				toastError('Unable to update route', toastStore, error);
 			} finally {
 				loading = false;
 			}

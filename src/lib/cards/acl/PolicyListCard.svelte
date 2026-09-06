@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getPolicyUser } from '$lib/common/types';
 	import { Autocomplete, getToastStore, TabGroup } from '@skeletonlabs/skeleton';
 	import { ACLBuilder, HAMetaDefault, type AclPolicy } from '$lib/common/acl.svelte';
 	import { toastSuccess, toastError, toOptions } from '$lib/common/funcs';
@@ -37,9 +38,7 @@
 		reorderDown,
 	}: PolicyListCardProps = $props()
 
-	const userNames = $derived(App.users.value.map((u) => {
-		return u.email ? u.email : u.name;
-	}).toSorted())
+	const userNames = $derived(App.users.value.map(getPolicyUser).toSorted())
 	const userNamesOptions = $derived(toOptions(userNames))
 	const tagNames = $derived(acl.getTagNames(true))
 	const tagNamesOptions = $derived(toOptions(tagNames))

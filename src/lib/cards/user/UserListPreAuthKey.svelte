@@ -1,91 +1,49 @@
 <script lang="ts">
-	import type { PreAuthKey } from '$lib/common/types';
-	import RawMdiClipboard from '~icons/mdi/clipboard';
-	import { getToastStore, popup, type PopupSettings } from '@skeletonlabs/skeleton';
-	import { copyToClipboard } from '$lib/common/funcs';
+	import { hasKeySecret, type PreAuthKey } from '$lib/common/types';
+	import RawMdiClipboard from '~icons/mdi/clipboard-outline';
+	import RawMdiClock from '~icons/mdi/clock-remove-outline';
+	import { getToastStore } from '@skeletonlabs/skeleton';
+	import { copyToClipboard, isExpired } from '$lib/common/funcs';
 	import Delete from '$lib/parts/Delete.svelte';
-	import { expirePreAuthKey, getPreAuthKeys } from '$lib/common/api';
+	import { expirePreAuthKey, deletePreAuthKey } from '$lib/common/api';
 	import { App } from '$lib/States.svelte';
 	import { onMount } from 'svelte';
-
-	type UserListPreAuthKeyProps = {
-		preAuthKey: PreAuthKey,
-	}
-	let { preAuthKey }: UserListPreAuthKeyProps = $props()
-
+	let { preAuthKey }: { preAuthKey: PreAuthKey } = $props();
 	const toastStore = getToastStore();
-	let pakIsExpired = $state(isExpired(preAuthKey))
-
-	function isExpired(preAuthKey: PreAuthKey): boolean {
-		return new Date() > new Date(preAuthKey.expiration);
-	}
-
-	onMount(()=>{
-		const interval = setInterval(() => {
-			pakIsExpired = isExpired(preAuthKey)
-		}, 1000)
-
-		return () => {
-			clearInterval(interval)
-		}
-	})
+	let now = $state(Date.now());
+	const expired = $derived.by(() => { void now; return isExpired(preAuthKey.expiration); });
+	onMount(() => {
+		const timer = setInterval(() => now = Date.now(), 1000);
+		return () => clearInterval(timer);
+	});
 </script>
 
-<div class="flex flex-row items-start">
-	<div class="flex flex-col px-2 gap-2">
-		<button
-			class="font-mono flex items-center border-2 border-dashed w-auto py-1.5 px-2 mr-3 border-slate-300 dark:border-slate-700"
-			onclick={() => copyToClipboard(preAuthKey.key, toastStore)}
-		>
-			<span class="mr-2">
+<div data-testid="preauth-key-{preAuthKey.id}" class="flex flex-wrap items-start justify-between gap-3 py-4 w-full min-w-0">
+	<div class="min-w-0 flex-1 space-y-2">
+		<div class="flex items-start gap-2">
+			<code class="break-all text-sm">{preAuthKey.key}</code>
+			<button type="button" class="btn-icon btn-icon-sm shrink-0" aria-label="Copy pre-auth key"
+				title={hasKeySecret(preAuthKey.key) ? 'Copy key' : 'Full key is only available at creation'}
+				disabled={!hasKeySecret(preAuthKey.key)} onclick={() => copyToClipboard(preAuthKey.key, toastStore)}>
 				<RawMdiClipboard />
-			</span>
-			{preAuthKey.key.substring(0, 8)}
-		</button>
-		<span class="mr-2 {isExpired(preAuthKey) && 'hidden'}">
-			<Delete
-				func={async () => {
-					await expirePreAuthKey(preAuthKey);
-					const keys = await getPreAuthKeys([preAuthKey.user.id]);
-					keys.forEach((pak) => {
-						App.updateValue(App.preAuthKeys, pak)
-					});
-				}}
-			/>
-		</span>
+			</button>
+		</div>
+		<div class="text-sm break-words">#{preAuthKey.id} &middot; {preAuthKey.aclTags.length ? preAuthKey.aclTags.join(', ') : preAuthKey.user?.name || 'Unassigned'}</div>
+		<div class="flex flex-wrap gap-2 text-xs">
+			{#if expired}<span class="badge variant-soft-error">Expired</span>{/if}
+			{#if preAuthKey.used}<span class="badge variant-soft-surface">Used</span>{/if}
+			{#if preAuthKey.reusable}<span class="badge variant-soft-success">Reusable</span>{/if}
+			{#if preAuthKey.ephemeral}<span class="badge variant-soft-secondary">Ephemeral</span>{/if}
+			<span>{preAuthKey.expiration && !preAuthKey.expiration.startsWith('0001-') ? new Date(preAuthKey.expiration).toLocaleString() : 'No expiry'}</span>
+		</div>
 	</div>
-	<div class="flex flex-col lg:flex-row gap-2">
-		<div class="items-center flex flex-row gap-1 lg:gap-2">
-			<span
-				class="badge badge-glass {preAuthKey.used
-					? 'variant-ghost-success'
-					: 'variant-flat opacity-50'}"
-			>
-				Used
-			</span>
-			<span
-				class="badge badge-glass {pakIsExpired
-					? 'variant-ghost-error'
-					: 'variant-flat opacity-50'}"
-			>
-				Expired
-			</span>
-		</div>
-		<div class="items-center flex flex-row gap-1 lg:gap-2">
-			<span
-				class="badge badge-glass {preAuthKey.ephemeral
-					? 'variant-ghost-secondary'
-					: 'variant-flat opacity-50'}"
-			>
-				Ephemeral
-			</span>
-			<span
-				class="badge badge-glass {preAuthKey.reusable
-					? 'variant-ghost-tertiary'
-					: 'variant-flat opacity-50'}"
-			>
-				Reusable
-			</span>
-		</div>
+	<div class="flex items-center shrink-0">
+		{#if !expired}
+			<Delete title="Expire key" icon={RawMdiClock} func={async () => {
+				await expirePreAuthKey(preAuthKey);
+				await App.populatePreAuthKeys();
+			}} />
+		{/if}
+		<Delete title="Delete key" func={() => deletePreAuthKey(preAuthKey)} />
 	</div>
 </div>

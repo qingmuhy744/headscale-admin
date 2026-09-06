@@ -1,0 +1,11 @@
+:80 {
+    handle /api/* {
+        reverse_proxy headscale:8080
+    }
+    handle {
+        root * /app
+        encode gzip zstd
+        try_files {path}.html {path}
+        file_server
+    }
+}

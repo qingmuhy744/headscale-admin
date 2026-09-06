@@ -7,6 +7,7 @@ import type { ToastStore } from '@skeletonlabs/skeleton';
 import { apiGet } from './common/api';
 import { arraysEqual, clone, toastError, toastWarning } from './common/funcs';
 import { debug } from './common/debug';
+import { matchesApiKey } from './common/types';
 
 export type LayoutStyle = 'tile' | 'list';
 
@@ -221,9 +222,10 @@ export class HeadscaleAdmin {
 
     async populateApiKeyInfo(): Promise<boolean> {
         const { apiKeys } = await apiGet<ApiApiKeys>(`/api/v1/apikey`);
-        const myKey = apiKeys.filter((key) => this.apiKey.value.startsWith(key.prefix))[0];
+        const myKey = apiKeys.find((key) => matchesApiKey(key, this.apiKey.value));
+        if (!myKey) throw new Error('Current API key was not found in the key list');
         const apiKeyInfo = this.apiKeyInfo.value
-        apiKeyInfo.expires = myKey.expiration;
+        apiKeyInfo.expires = myKey.expiration || '0001-01-01T00:00:00Z';
         apiKeyInfo.authorized = true;
         this.apiKeyInfo.value = {...apiKeyInfo};
         return true;
@@ -263,7 +265,7 @@ export class HeadscaleAdmin {
     }
 
     updateValue(valued: Valued<Identified[]>, item: Identified) {
-        valued.value = valued.value.map((itemOld) => (itemOld.id === item.id ? item : itemOld));
+        valued.value = valued.value.map((itemOld) => (itemOld.id === item.id ? Object.assign(itemOld, item) : itemOld));
     }
 }
 
@@ -302,8 +304,7 @@ export function informUserExpiringSoon(toastStore: ToastStore) {
 		if (App.apiKeyInfo.value.informedExpiringSoon === true) {
 			return;
 		}
-		App.apiKeyInfo.value.informedUnauthorized = true;
-		App.apiKeyInfo.value.authorized = false;
+		App.apiKeyInfo.value.informedExpiringSoon = true;
 		toastWarning('API Key Expires Soon', toastStore);
 	});
 }

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nodeBelongsToUser } from '$lib/common/types';
 	import type { User } from '$lib/common/types';
 	import RawMdiUser from '~icons/mdi/user';
 	import { App } from '$lib/States.svelte';
@@ -12,7 +13,7 @@
 	}: OnlineUserIndicatorProps = $props()
 
 	const color = $derived(
-		App.nodes.value.some((n) => n.online && n.user.id == user.id)
+		App.nodes.value.some((n) => n.online && nodeBelongsToUser(n, user.id))
 		? 'text-success-600 dark:text-success-400'
 		: 'text-error-500 dark:text-error-400'
 	)

@@ -8,33 +8,22 @@ import type {
 	PreAuthKey,
 	User,
 } from '$lib/common/types';
-import { debug } from '../debug';
+import type { ApiApiKeys, ApiKey } from '$lib/common/types';
+import { API_URL_APIKEY } from './url';
 
 export async function getPreAuthKeys(
 	user_ids?: string[],
 	init?: RequestInit,
 ): Promise<PreAuthKey[]> {
-	if (user_ids == undefined) {
-		user_ids = (await getUsers(init)).map((u) => u.id);
-	}
-	const promises: Promise<ApiPreAuthKeys>[] = [];
-	let preAuthKeysAll: PreAuthKey[] = [];
+	const { preAuthKeys } = await apiGet<ApiPreAuthKeys>(API_URL_PREAUTHKEY, init);
+	return user_ids === undefined
+		? preAuthKeys
+		: preAuthKeys.filter((key) => key.user && user_ids.includes(key.user.id));
+}
 
-	user_ids.forEach(async (user_id: string) => {
-		if(user_id != ""){
-			promises.push(
-				apiGet<ApiPreAuthKeys>(API_URL_PREAUTHKEY + '?user=' + user_id, init),
-			);
-		}
-	});
-
-	promises.forEach(async (p) => {
-		const { preAuthKeys } = await p;
-		preAuthKeysAll = preAuthKeysAll.concat(preAuthKeys);
-	});
-
-	await Promise.all(promises);
-	return preAuthKeysAll;
+export async function getApiKeys(init?: RequestInit): Promise<ApiKey[]> {
+	const { apiKeys } = await apiGet<ApiApiKeys>(API_URL_APIKEY, init);
+	return apiKeys;
 }
 
 type GetUserOptions = 
@@ -46,11 +35,11 @@ export async function getUsers(init?: RequestInit, options?: GetUserOptions): Pr
 	let url = API_URL_USER;
 	if (options !== undefined){
 		if(options.id !== undefined) {
-			url += "?id=" + options.id
+			url += "?" + new URLSearchParams({ id: options.id })
 		} else if (options.name !== undefined) {
-			url += "?name=" + options.name
+			url += "?" + new URLSearchParams({ name: options.name })
 		} else if (options.email !== undefined) {
-			url += "?email=" + options.email
+			url += "?" + new URLSearchParams({ email: options.email })
 		} else {
 			throw new Error("Invalid User Parameters")
 		}

@@ -1,32 +1,37 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
+	import type { Component } from 'svelte';
+	import { getToastStore } from '@skeletonlabs/skeleton';
+	import { toastError } from '$lib/common/funcs';
 
 	import RawMdiDelete from '~icons/mdi/delete';
 	import RawMdiCheckCircleOutline from '~icons/mdi/check-circle-outline';
 	import RawMdiCloseCircleOutline from '~icons/mdi/close-circle-outline';
 
 	type DeleteProps = {
-		func: () => void,
+		func: () => unknown | Promise<unknown>,
+		title?: string,
+		icon?: Component,
 		show?: boolean,
 		disabled?: boolean,
 	}
 
-	let { func, show = false, disabled = false }: DeleteProps = $props()
+	let { func, show = false, disabled = false, title = 'Delete', icon: Icon = RawMdiDelete }: DeleteProps = $props()
+	const toastStore = getToastStore();
 </script>
 
 <div class="flex flex-row items-center justify-end py-0 my-0 pl-0 ml-4">
 	{#if show}
 		<span transition:slide={{ delay: 50, axis: 'x' }} class="text-right flex space-x-2">
 			<button
+				type="button" aria-label="Confirm {title}" title="Confirm {title}"
 				{disabled}
 				onclick={async () => {
 					try {
 						disabled = true;
-						if (func.constructor.name === 'AsyncFunction') {
-							await func();
-						} else {
-							func();
-						}
+						await func();
+					} catch (error) {
+						toastError(`${title} failed`, toastStore, error);
 					} finally {
 						disabled = false;
 						show = false;
@@ -36,6 +41,7 @@
 				<RawMdiCheckCircleOutline />
 			</button>
 			<button
+				type="button" aria-label="Cancel {title}" title="Cancel {title}"
 				{disabled}
 				onclick={() => {
 					show = false;
@@ -46,8 +52,8 @@
 		</span>
 	{/if}
 	<span class="text-error-600 dark:text-error-400 ml-2">
-		<button {disabled} onclick={() => (show = !show)}>
-			<RawMdiDelete />
+		<button type="button" {title} aria-label={title} {disabled} onclick={() => (show = !show)}>
+			<Icon />
 		</button>
 	</span>
 </div>

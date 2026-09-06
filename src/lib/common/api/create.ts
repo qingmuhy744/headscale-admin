@@ -16,7 +16,7 @@ export async function createApiKey() {
 	date.setDate(date.getDate() + 90);
 	const data = { expiration: date.toISOString() };
 	const { apiKey } = await apiPost<ApiApiKey>(API_URL_APIKEY, data);
-	debug('Created API Key "...' + apiKey.slice(-10) + '"')
+	debug('Created API Key')
 	return apiKey;
 }
 
@@ -31,25 +31,28 @@ export async function createUser(username: string): Promise<User> {
 }
 
 export async function createNode(key: string, username: string): Promise<Node> {
-	const data = '?user=' + username + '&key=' + key;
+	const data = '?' + new URLSearchParams({ user: username, key });
 	const { node } = await apiPost<ApiNode>(API_URL_NODE + '/register' + data)
 	debug('Created Node "' + node.givenName + '" for user "' + username + '"');
 	return node;
 }
 
 export async function createPreAuthKey(
-	user: User,
+	user: User | null,
 	ephemeral: boolean,
 	reusable: boolean,
 	expiration: Date | string,
+	aclTags: string[] = [],
 ) {
+	if (!user && aclTags.length === 0) throw new Error('Select a user or at least one tag');
 	const data = {
-		user: user.id,
+		user: user?.id,
+		aclTags: aclTags.map((tag) => tag.startsWith('tag:') ? tag : 'tag:' + tag),
 		reusable,
 		ephemeral,
 		expiration: new Date(expiration).toISOString(),
 	};
 	const { preAuthKey } = await apiPost<ApiPreAuthKey>(API_URL_PREAUTHKEY, data);
-	debug('Created PreAuthKey for user "' + user.name + '"');
+	debug('Created PreAuthKey', preAuthKey.id);
 	return preAuthKey;
 }

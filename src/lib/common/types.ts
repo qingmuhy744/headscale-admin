@@ -35,7 +35,20 @@ export function isNamed(item: unknown): item is Named {
 }
 
 export function isNode(item: Named): item is Node {
-	return isNamed(item) && (item as Node).user !== undefined;
+	return isNamed(item) && Array.isArray((item as Node).ipAddresses);
+}
+
+export function nodeBelongsToUser(node: Node, userId: string): boolean {
+	return node.tags.length === 0 && node.user?.id === userId;
+}
+
+export function hasKeySecret(key: string): boolean {
+	return key.trim().length > 0 && !key.includes('*');
+}
+
+export function matchesApiKey(record: ApiKey, secret: string): boolean {
+	const prefix = record.prefix.replace(/\*+$/, '');
+	return prefix.length > 0 && secret.startsWith(prefix);
 }
 
 export function isUser(item: Named): item is User {
@@ -48,6 +61,11 @@ export function getUserDisplay(user: User): string {
 	} else {
 		return user.name;
 	}
+}
+
+export function getPolicyUser(user: User): string {
+	const identifier = user.email || user.name || user.providerId;
+	return identifier.includes('@') ? identifier : identifier + '@';
 }
 
 export function getTypeName(item: Named): ItemTypeName {
@@ -76,22 +94,17 @@ export type ApiPreAuthKey = {
 	preAuthKey: PreAuthKey;
 };
 
-export class PreAuthKey {
-	constructor(
-		public user: User,
-		public id: string,
-		public key: string,
-		public reusable: boolean,
-		public ephemeral: boolean,
-		public used: boolean,
-		public expiration: string,
-		public createdAt: string,
-		public aclTags: string[],
-	) { }
-	isExpired: () => boolean = () => {
-		return new Date() > new Date(this.expiration);
-	};
-}
+export type PreAuthKey = {
+	user: User | null;
+	id: string;
+	key: string;
+	reusable: boolean;
+	ephemeral: boolean;
+	used: boolean;
+	expiration: string | null;
+	createdAt: string | null;
+	aclTags: string[];
+};
 
 export class PreAuthKeys {
 	constructor(public preAuthKeys: PreAuthKey[]) { }
@@ -131,20 +144,17 @@ export type Node = {
 	discoKey: string;
 	ipAddresses: string[];
 	name: string;
-	user: User;
+	user: User | null;
 	lastSeen: string | null;
-	lastSuccessfulUpdate: string | null;
 	expiry: string | null;
-	preAuthKey: string | null;
+	preAuthKey: PreAuthKey | null;
 	createdAt: string;
 	registerMethod:
 	| 'REGISTER_METHOD_UNSPECIFIED'
 	| 'REGISTER_METHOD_AUTH_KEY'
 	| 'REGISTER_METHOD_CLI'
 	| 'REGISTER_METHOD_OIDC';
-	forcedTags: string[];
-	invalidTags: string[];
-	validTags: string[];
+	tags: string[];
 	givenName: string;
 	online: boolean;
 	approvedRoutes: string[];
@@ -166,10 +176,10 @@ export type ApiMachine = {
 
 export type ApiKey = {
 	id: string;
-	createdAt: string;
+	createdAt: string | null;
 	prefix: string;
-	expiration: string;
-	lastSeen: string;
+	expiration: string | null;
+	lastSeen: string | null;
 };
 export type ApiApiKey = {
 	apiKey: string;

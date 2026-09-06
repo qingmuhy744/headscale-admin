@@ -1,5 +1,10 @@
 # headscale-admin
 
+This fork targets **Headscale v0.29.2**. Its image tag is `hs-0.29.2-1`,
+published to GitHub Container Registry under `qingmuhy744/headscale-admin`.
+See [compatibility, local acceptance, publishing and rollback](docs/headscale-0.29.2.md)
+for this fork's deployment instructions. The upstream documentation follows below.
+
 headscale-admin is meant to be a simple, modern, and useful web interface for [juanfont/headscale](https://github.com/juanfont/headscale) - *"An open source, self-hosted implementation of the Tailscale control server."*
 
 headscale-admin is still in active development and will evolve in tandem with headscale. It should not be treated as a final product, but when used properly, it should be safe to run in a production environment.
@@ -8,7 +13,8 @@ headscale-admin is still in active development and will evolve in tandem with he
 
 ### Known Issues
 
-- No known issues at this time.
+- This fork targets v0.29.2 only; it does not claim compatibility with 0.26 or unreleased 0.30 APIs.
+- Advanced policy fields are preserved and can be edited in Config. Visual tag/group/host renames or deletions are blocked when advanced fields reference them.
 
 ### Securing headscale-admin
 

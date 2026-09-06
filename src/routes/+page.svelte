@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nodeBelongsToUser } from '$lib/common/types';
 	import CardTileContainer from '$lib/cards/CardTileContainer.svelte';
 	import CardTilePage from '$lib/cards/CardTilePage.svelte';
 	import Page from '$lib/page/Page.svelte';
@@ -37,7 +38,7 @@
 				value: App.users.value.filter((user) =>
 					App.nodes.value
 						.filter((node) => node.online)
-						.some((node) => node.user.id === user.id),
+						.some((node) => nodeBelongsToUser(node, user.id)),
 				).length,
 				path: '/users',
 			},

@@ -1,0 +1,16 @@
+{
+  "groups": { "group:dev": ["alice@"] },
+  "tagOwners": { "tag:router": ["group:dev"], "tag:test": ["group:dev"] },
+  "hosts": { "test-subnet": "10.77.0.0/24" },
+  "grants": [{ "src": ["*"], "dst": ["*"], "ip": ["*"] }],
+  "ssh": [{
+    "action": "check",
+    "checkPeriod": "12h",
+    "src": ["autogroup:member"],
+    "dst": ["autogroup:self"],
+    "users": ["autogroup:nonroot", "root"]
+  }],
+  "autoApprovers": { "routes": { "10.77.0.0/24": ["tag:router"] } },
+  "nodeAttrs": [{ "target": ["*"], "attr": ["randomize-client-port"] }],
+  "tests": [{ "src": "alice@", "accept": ["10.77.0.1:80"] }]
+}

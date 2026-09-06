@@ -45,12 +45,16 @@
     */
 
     function applyConfig(config: TextContent) {
-        acl = ACLBuilder.fromPolicy(config.text)
-        editing = false
+        try {
+            acl = ACLBuilder.fromPolicy(config.text)
+            editing = false
+        } catch (error) {
+            toastError('Invalid policy', ToastStore, error)
+        }
     }
 
     function resetConfig() {
-        acl = ACLBuilder.defaultACL()
+        if (window.confirm('Replace the entire policy with the default policy?')) acl = ACLBuilder.defaultACL()
     }
 
     function loadConfig() {

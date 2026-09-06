@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getPolicyUser } from '$lib/common/types';
 	import { getToastStore } from '@skeletonlabs/skeleton';
 	import type { ACLBuilder } from '$lib/common/acl.svelte';
 	import type { User } from '$lib/common/types';
@@ -34,7 +35,7 @@
 	let loading = $state(false);
 	let deleting = $state(false);
 	const options = $derived.by(() => {
-		const us = App.users.value.map(u => u.name)
+		const us = App.users.value.map(getPolicyUser)
 		us.sort()
 
 		const gs = acl.getGroupNames(true)

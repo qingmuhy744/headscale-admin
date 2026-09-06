@@ -1,23 +1,16 @@
 import { apiDelete, apiPost } from './base';
-import type { User, Node } from '$lib/common/types';
+import type { User, Node, PreAuthKey } from '$lib/common/types';
 import { debug } from '../debug';
-import { API_URL_APIKEY, API_URL_NODE, API_URL_USER } from './url';
+import { API_URL_APIKEY, API_URL_NODE, API_URL_USER, API_URL_PREAUTHKEY } from './url';
 import { App } from '$lib/States.svelte';
 
-export async function expireApiKey(apiKey: string) {
-	if (apiKey.indexOf('.') > -1) {
-		apiKey = apiKey.split('.').at(0) || '';
-	}
-	if (!apiKey) {
-		debug('Invalid API Key/Prefix');
-		return;
-	}
-	try {
-		await apiPost(`${API_URL_APIKEY}/expire`, { prefix: apiKey });
-		debug('Expired API Key with Prefix ' + apiKey);
-	} catch (error) {
-		debug(error);
-	}
+export async function expireApiKey(id: string) {
+	await apiPost(`${API_URL_APIKEY}/expire`, { id });
+}
+
+export async function deletePreAuthKey(key: PreAuthKey) {
+	await apiDelete(`${API_URL_PREAUTHKEY}?${new URLSearchParams({ id: key.id })}`);
+	App.preAuthKeys.value = App.preAuthKeys.value.filter((item) => item.id !== key.id);
 }
 
 export async function deleteUser(user: User): Promise<boolean> {

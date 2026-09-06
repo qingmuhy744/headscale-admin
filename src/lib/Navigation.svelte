@@ -9,6 +9,7 @@
 	import RawMdiRouter from '~icons/mdi/router';
 	import RawMdiSecurity from '~icons/mdi/security';
 	import RawMdiSettings from '~icons/mdi/settings';
+	import RawMdiKey from '~icons/mdi/key-outline';
 
 	// import { ApiKeyInfoStore, ApiKeyStore, hasValidApi } from './Stores';
 	import { onMount, type Component } from 'svelte';
@@ -45,6 +46,7 @@
 		{ path: '/', name: 'Home', logo: RawMdiHome },
 		{ path: '/users', name: 'Users', logo: RawMdiPerson },
 		{ path: '/nodes', name: 'Nodes', logo: RawMdiDevices },
+		{ path: '/keys', name: 'Keys', logo: RawMdiKey },
 		{ path: '/deploy', name: 'Deploy', logo: RawMdiHomeGroupPlus },
 		{ path: '/routes', name: 'Routes', logo: RawMdiRouter },
 		{ path: '/acls', name: 'ACLs', logo: RawMdiSecurity },
