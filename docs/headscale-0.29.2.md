@@ -17,6 +17,8 @@ at commit `07cf626`; its API implementation is not imported.
 Frontend release `hs-0.29.2-6` adds a header language menu synchronized with Settings,
 clearer Claude list boundaries, and matching light/dark policy viewing and editing
 colors. Policy copy feedback follows the selected language.
+Frontend release `hs-0.29.2-7` fixes low-contrast buttons and item counts in the
+ACL editor's table mode, including light/dark and hover states in the Claude theme.
 
 ## Compatibility changes
 
@@ -92,17 +94,17 @@ It runs checks, unit tests, a real backend and browser tests before publishing.
 Push a version tag to publish both `linux/amd64` and `linux/arm64`:
 
 ```sh
-git tag hs-0.29.2-6
-git push origin hs-0.29.2-6
+git tag hs-0.29.2-7
+git push origin hs-0.29.2-7
 ```
 
 To retry publishing an existing tag without moving it:
 
 ```sh
-gh workflow run docker-build.yml --ref main -f release_tag=hs-0.29.2-6
+gh workflow run docker-build.yml --ref main -f release_tag=hs-0.29.2-7
 ```
 
-The artifact is `ghcr.io/qingmuhy744/headscale-admin:hs-0.29.2-6`.
+The artifact is `ghcr.io/qingmuhy744/headscale-admin:hs-0.29.2-7`.
 The package must be public for an unauthenticated mirror to fetch it.
 Record the release digest and source revision before deploying. Release tags
 should be immutable; use a new suffix for subsequent changes.
@@ -112,7 +114,7 @@ should be immutable; use a new suffix for subsequent changes.
 Keep this short image name in the server's Compose file:
 
 ```yaml
-image: qingmuhy744/headscale-admin:hs-0.29.2-6
+image: qingmuhy744/headscale-admin:hs-0.29.2-7
 ```
 
 The configured `docker.1ms.run` mirror returned `not found` when pulling this short
@@ -121,8 +123,8 @@ as described in its [registry mapping documentation](https://mdoc.cc/mliev/1ms/v
 Pull through that domestic endpoint, then tag the same image with the short name:
 
 ```sh
-sudo docker pull ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-6
-sudo docker tag ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-6 qingmuhy744/headscale-admin:hs-0.29.2-6
+sudo docker pull ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-7
+sudo docker tag ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-7 qingmuhy744/headscale-admin:hs-0.29.2-7
 ```
 
 If the mirror reports a missing `application/vnd.in-toto+json` build attestation,

@@ -126,6 +126,7 @@ body {
 	--jse-panel-border: var(--jse-main-border);
 	--jse-panel-button-color-highlight: var(--code-text);
 	--jse-panel-button-background-highlight: var(--code-highlight);
+	--jse-button-primary-color: var(--code-text);
 	--jse-key-color: var(--code-key);
 	--jse-value-color: var(--code-text);
 	--jse-value-color-string: var(--code-string);
@@ -184,6 +185,11 @@ body {
 
 [data-theme='claude'] .acl-config-code .codeblock-pre {
 	padding-top: 16px;
+}
+
+[data-theme='claude'] .acl-config-code .jse-nested-array-count {
+	color: var(--code-muted);
+	opacity: 1 !important;
 }
 
 [data-theme='claude'] .acl-config-code :is(.hljs-punctuation, .hljs-comment) {
