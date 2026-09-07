@@ -16,4 +16,4 @@
 	);
 </script>
 
-<RawMdiBroadcast class={color} />
+<RawMdiBroadcast class="shrink-0 {color}" />

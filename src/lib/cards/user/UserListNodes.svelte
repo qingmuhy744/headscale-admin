@@ -28,8 +28,9 @@
 
 <CardListEntry {title}>
 	{#each filteredNodes as node}
-		<div class="flex flex-row items-center gap-3 justify-end">
+		<div class="flex min-w-0 flex-row items-center gap-3 justify-end">
 			<a
+				class="min-w-0 break-words"
 				href=" "
 				onclick={() => {
 					openDrawer(drawerStore, 'nodeDrawer-' + node.id, node);
