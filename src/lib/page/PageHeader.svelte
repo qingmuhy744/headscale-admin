@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { SlideToggle } from '@skeletonlabs/skeleton';
 	import { slide } from 'svelte/transition';
 	import RawMdiViewListOutline from '~icons/mdi/view-list-outline';
@@ -22,7 +23,7 @@
 		title,
 		show = $bindable(false),
 		layout = $bindable(undefined),
-		buttonText = 'Create',
+		buttonText = $t('cards.create'),
 		button,
 	}: PageHeaderProps = $props()
 
@@ -77,7 +78,7 @@
 					class="input rounded-md text-sm w-64 md:w-96 {regexIsValid ? '' : 'input-error'}"
 					bind:value={filterString}
 					use:focus
-					placeholder="Search..."
+					placeholder={$t('common.search')}
 				/>
 			{/if}
 		</div>

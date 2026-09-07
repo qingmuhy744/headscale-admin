@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import type { User } from '$lib/common/types';
 	import CardListEntry from '../CardListEntry.svelte';
 
@@ -10,6 +11,6 @@
 
 </script>
 
-<CardListEntry title="Email:">
+<CardListEntry title={$t('cards.email')}>
 	{user.email}
 </CardListEntry>

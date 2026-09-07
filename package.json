@@ -1,6 +1,6 @@
 {
   "name": "headscale-admin",
-  "version": "0.29.2-3",
+  "version": "0.29.2-4",
   "private": true,
   "scripts": {
     "dev": "vite dev",
@@ -56,6 +56,7 @@
     "ipaddr.js": "^2.2.0",
     "js-xxhash": "^4.0.0",
     "json5": "^2.2.3",
+    "svelte-i18n": "4.0.1",
     "svelte-jsoneditor": "^2.4.0",
     "unplugin-icons": "^22.1.0"
   }

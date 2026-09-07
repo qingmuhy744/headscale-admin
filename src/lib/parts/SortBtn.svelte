@@ -6,19 +6,21 @@
 	type SortBtnProps = {
 		value: string,
 		name: string,
+		method: string,
 		direction: Direction,
 		toggle: (_: string) => void,
 	}
 	let {
 		value = $bindable(),
 		name,
+		method,
 		direction,
 		toggle,
 	}: SortBtnProps = $props()
 </script>
 
-<button onclick={() => toggle(name.toLowerCase())}>
-	<span class={value.toLowerCase() === name.toLowerCase() ? '' : 'invisible'}>
+<button aria-pressed={value === method} onclick={() => toggle(method)}>
+	<span class={value === method ? '' : 'invisible'}>
 		{#if direction === 'up'}
 			<RawMdiArrowUpThin />
 		{:else}

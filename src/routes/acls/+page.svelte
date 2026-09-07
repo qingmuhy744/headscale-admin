@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { TabGroup, getToastStore } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
 	import RawMdiCodeJSON from '~icons/mdi/code-json';
@@ -34,14 +35,14 @@
 
 	// Navigation tabs
 	let tabSet: number = $state(5);
-	const tabs = [
-		{ name: 'groups', title: 'Groups', logo: RawMdiGroups },
-		{ name: 'tag-owners', title: 'Tag Owners', logo: RawMdiTag },
-		{ name: 'hosts', title: 'Hosts', logo: RawMdiDevices },
-		{ name: 'policies', title: 'Policies', logo: RawMdiSecurity },
+	const tabs = $derived([
+		{ name: 'groups', title: $t('acls.groups'), logo: RawMdiGroups },
+		{ name: 'tag-owners', title: $t('acls.tagOwners'), logo: RawMdiTag },
+		{ name: 'hosts', title: $t('acls.hosts'), logo: RawMdiDevices },
+		{ name: 'policies', title: $t('acls.policies'), logo: RawMdiSecurity },
 		{ name: 'ssh', title: 'SSH', logo: RawMdiConsole },
-		{ name: 'config', title: 'Config', logo: RawMdiCodeJSON },
-	];
+		{ name: 'config', title: $t('acls.config'), logo: RawMdiCodeJSON },
+	]);
 
 	async function loadPolicy() {
 		loading = true
@@ -55,7 +56,7 @@
 		} catch (error) {
 			loadError = error instanceof Error ? error.message : String(error)
 			noPolicy = loadError === 'loading ACL from database: acl policy not found'
-			if (!noPolicy) toastError('Unable to load policy', ToastStore, error)
+			if (!noPolicy) toastError($t('ui.unableToLoadPolicy'), ToastStore, error)
 		} finally {
 			loading = false
 		}
@@ -64,21 +65,21 @@
 </script>
 
 <Page>
-	<PageHeader title="ACL Builder" />
+	<PageHeader title={$t('ui.aclBuilder')} />
 	{#if !loaded}
 		<div class="p-4 space-y-3" role="status">
 			{#if loading}
-				<p>Loading policy...</p>
+				<p>{$t('ui.loadingPolicy')}</p>
 			{:else if noPolicy}
-				<p>No policy configured.</p>
+				<p>{$t('ui.noPolicyConfigured')}</p>
 				<button type="button" class="btn btn-sm variant-filled-secondary" onclick={() => {
 					acl = ACLBuilder.defaultACL()
 					loaded = true
-				}}><RawMdiPlus /> Create policy</button>
+				}}><RawMdiPlus /> {$t('acls.createPolicy')}</button>
 			{:else}
 				<p class="text-error-500 break-words">{loadError}</p>
 				<button type="button" class="btn btn-sm variant-filled-secondary" onclick={loadPolicy}>
-					<RawMdiRefresh /> Retry
+					<RawMdiRefresh /> {$t('ui.retry')}
 				</button>
 			{/if}
 		</div>

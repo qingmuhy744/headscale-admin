@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { Accordion, getToastStore } from '@skeletonlabs/skeleton';
 	import { saveConfig, type ACLBuilder } from '$lib/common/acl.svelte';
 	import { debug } from '$lib/common/debug';
@@ -21,7 +22,7 @@
 		loading = true;
 		try {
 			acl.createTag(newTagName);
-			toastSuccess(`Tag Ownership of '${newTagName}' created`, ToastStore);
+			toastSuccess($t('ui.tagOwnershipOfValueCreated', { values: { v0: String(newTagName) } }), ToastStore);
 			newTagName = '';
 			showCreateTag = false;
 		} catch (e) {
@@ -59,12 +60,12 @@
 				<RawMdiSave />
 			</button>
 			<button class="btn-sm rounded-md variant-filled-success" onclick={toggleShowCreateTag}>
-				Create Tag
+				{$t('acls.createTag')}
 			</button>
 		</div>
 		{#if showCreateTag}
 			<NewItem
-				title="Tag"
+				title={$t('cards.tag')}
 				disabled={loading}
 				bind:name={newTagName}
 				submit={() => {
@@ -79,7 +80,7 @@
 			autocomplete="off"
 			type="text"
 			class="input rounded-md text-sm mb-0"
-			placeholder="Filter Tags..."
+			placeholder={$t('ui.filterTags')}
 			bind:value={tagsFilter}
 		/>
 	</div>

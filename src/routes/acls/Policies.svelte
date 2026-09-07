@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { Accordion, getToastStore } from '@skeletonlabs/skeleton';
 	import { ACLBuilder, HAMetaDefault, saveConfig, type AclPolicies, type AclPoliciesIndexed } from '$lib/common/acl.svelte';
 	import { debug } from '$lib/common/debug';
@@ -39,7 +40,7 @@
 
 		acl.createPolicy(policy)
 		debug("created new policy at index " + (acl.acls.length - 1).toString())
-		toastSuccess('Created Policy #' + acl.acls.length, ToastStore)
+		toastSuccess($t('ui.createdPolicy') + acl.acls.length, ToastStore)
 	}
 
 	function makeReorderFunc(idx: number, direction: 'up' | 'down'): () => void {
@@ -68,7 +69,7 @@
 				<RawMdiSave />
 			</button>
 			<button class="btn-sm rounded-md variant-filled-success" onclick={newPolicy}>
-				Create Policy
+				{$t('acls.createPolicyb631e6')}
 			</button>
 		</div>
 	</div>
@@ -78,7 +79,7 @@
 			autocomplete="off"
 			type="text"
 			class="input rounded-md text-sm mb-0"
-			placeholder="Filter Policies..."
+			placeholder={$t('ui.filterPolicies')}
 			bind:value={policyFilterString}
 		/>
 	</div>

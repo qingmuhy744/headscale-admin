@@ -1,3 +1,5 @@
+import { translate } from '$lib/i18n';
+import { DEFAULT_THEME, setTheme } from '$lib/common/themes';
 import { Mutex } from 'async-mutex';
 
 import { browser } from '$app/environment';
@@ -111,9 +113,9 @@ export class HeadscaleAdmin {
     debug = new StateLocal<boolean>('debug', false);
 
     // theme information
-    theme = new StateLocal<string>('theme', 'skeleton', (themeName) => {
+    theme = new StateLocal<string>('theme', DEFAULT_THEME, (themeName) => {
         if(themeName !== undefined) {
-            document.body.setAttribute('data-theme', themeName);
+            setTheme(themeName);
         }
     })
 
@@ -223,7 +225,7 @@ export class HeadscaleAdmin {
     async populateApiKeyInfo(): Promise<boolean> {
         const { apiKeys } = await apiGet<ApiApiKeys>(`/api/v1/apikey`);
         const myKey = apiKeys.find((key) => matchesApiKey(key, this.apiKey.value));
-        if (!myKey) throw new Error('Current API key was not found in the key list');
+        if (!myKey) throw new Error(translate('ui.currentApiKeyWasNotFoundInTheKeyList'));
         const apiKeyInfo = this.apiKeyInfo.value
         apiKeyInfo.expires = myKey.expiration || '0001-01-01T00:00:00Z';
         apiKeyInfo.authorized = true;
@@ -295,7 +297,7 @@ export function informUserUnauthorized(toastStore: ToastStore) {
 		}
 		App.apiKeyInfo.value.informedUnauthorized = true;
 		App.apiKeyInfo.value.authorized = false;
-		toastError('API Key is Unauthorized or Invalid', toastStore);
+		toastError(translate('ui.apiKeyIsUnauthorizedOrInvalid'), toastStore);
 	});
 }
 
@@ -305,6 +307,6 @@ export function informUserExpiringSoon(toastStore: ToastStore) {
 			return;
 		}
 		App.apiKeyInfo.value.informedExpiringSoon = true;
-		toastWarning('API Key Expires Soon', toastStore);
+		toastWarning(translate('ui.apiKeyExpiresSoon'), toastStore);
 	});
 }

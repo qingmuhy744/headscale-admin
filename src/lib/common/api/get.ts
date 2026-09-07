@@ -1,3 +1,4 @@
+import { translate } from '$lib/i18n';
 import { API_URL_NODE, API_URL_POLICY, API_URL_PREAUTHKEY, API_URL_USER, apiGet } from '$lib/common/api';
 import type {
 	ApiNodes,
@@ -41,7 +42,7 @@ export async function getUsers(init?: RequestInit, options?: GetUserOptions): Pr
 		} else if (options.email !== undefined) {
 			url += "?" + new URLSearchParams({ email: options.email })
 		} else {
-			throw new Error("Invalid User Parameters")
+			throw new Error(translate('ui.invalidUserParameters'))
 		}
 	}
 	const { users } = await apiGet<ApiUsers>(url, init);

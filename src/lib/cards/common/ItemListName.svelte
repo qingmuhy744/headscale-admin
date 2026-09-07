@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import type { ItemTypeName, Named } from '$lib/common/types';
 	import { getTypeName, isUser, isNode } from '$lib/common/types';
 	import { fade } from 'svelte/transition';
@@ -32,7 +33,7 @@
 	const ToastStore = getToastStore();
 </script>
 
-<CardListEntry title="Name:">
+<CardListEntry title={$t('cards.name')}>
 	<div class="grid text-right overlap-children">
 		{#if showRename}
 			<div
@@ -59,7 +60,7 @@
 									switch (prefix) {
 										case 'user':
 											if(newName === ''){
-												toastError('User name must not be empty', ToastStore)
+												toastError($t('ui.userNameMustNotBeEmpty'), ToastStore)
 												return
 											}
 											if (isUser(item)) {
@@ -75,7 +76,7 @@
 											}
 										case 'node':
 											if(newName === ''){
-												toastError('Node name must not be empty', ToastStore)
+												toastError($t('ui.nodeNameMustNotBeEmpty'), ToastStore)
 												return
 											}
 											if (isNode(item)) {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { getPolicyUser } from '$lib/common/types';
 	import { Autocomplete, getToastStore, InputChip, popup, Tab, TabGroup, type PopupSettings } from '@skeletonlabs/skeleton';
 	import { ACLBuilder, type AclPolicy, type AclSshRule } from '$lib/common/acl.svelte';
@@ -56,19 +57,19 @@
 	let deleting = $state(false);
 
 	let tabSetSrc = $state(0)
-	const tabsSrc = [
-		{ name: "custom", title: "Custom", logo: RawMdiPencil },
-		{ name: "user", title: "User", logo: RawMdiTag },
-		{ name: "group", title: "Group", logo: RawMdiGroups },
-		{ name: "tag", title: "Tag", logo: RawMdiTag },
-	]
+	const tabsSrc = $derived([
+		{ name: "custom", title: $t('cards.custom'), logo: RawMdiPencil },
+		{ name: "user", title: $t('common.user'), logo: RawMdiTag },
+		{ name: "group", title: $t('cards.group'), logo: RawMdiGroups },
+		{ name: "tag", title: $t('cards.tag'), logo: RawMdiTag },
+	])
 
 	let tabSetDst = $state(0)
-	const tabsDst = [
-		{ name: "custom", title: "Custom", logo: RawMdiPencil },
-		{ name: "user", title: "User", logo: RawMdiTag },
-		{ name: "tag", title: "Tag", logo: RawMdiTag },
-	]
+	const tabsDst = $derived([
+		{ name: "custom", title: $t('cards.custom'), logo: RawMdiPencil },
+		{ name: "user", title: $t('common.user'), logo: RawMdiTag },
+		{ name: "tag", title: $t('cards.tag'), logo: RawMdiTag },
+	])
 	
 	const srcNewType = $derived(tabsSrc[tabSetSrc].name)
 	let srcNewHost = $state('')
@@ -95,7 +96,7 @@
 		deleting = true;
 		try {
 			acl.delSshRule(idx)
-			toastSuccess(`SSH Rule #'${idx+1}' has been deleted`, ToastStore);
+			toastSuccess($t('ui.sshRuleValueHasBeenDeleted', { values: { v0: String(idx+1) } }), ToastStore);
 		} catch (e) {
 			if (e instanceof Error) {
 				toastError('', ToastStore, e);
@@ -116,7 +117,7 @@
 
 	function addSrc(host: string) {
 		if (host.length === 0) {
-			throw new Error("Invailid Host Provided")
+			throw new Error($t('ui.invailidHostProvided'))
 		}
 
 		rule.src.push(host)
@@ -124,7 +125,7 @@
 
 	function addDst(host: string) {
 		if (host.length === 0) {
-			throw new Error("Invailid Host Provided")
+			throw new Error($t('ui.invailidHostProvided'))
 		}
 
 		rule.dst.push(host)
@@ -135,11 +136,11 @@
 	}
 </script>
 
-<ListEntry id={idx.toString()} name={"SSH Rule #" + (idx + 1)} logo={RawMdiSecurity} bind:open>
+<ListEntry id={idx.toString()} name={$t('details.sshRule', { values: { number: idx + 1 } })} logo={RawMdiSecurity} bind:open>
 	{#snippet children()}
 	<CardListContainer>
 		<h3 class="font-mono mb-2 flex flex-row items-center">
-			<span>Sources:</span>
+			<span>{$t('cards.sources')}</span>
 		</h3>
 		<div>
 			<TabGroup
@@ -170,7 +171,7 @@
 				<input
 					autocomplete="off"
 					class="input rounded-md mt-2"
-					placeholder="Src Object..."
+					placeholder={$t('ui.srcObject')}
 					bind:value={srcNewHost}
 					disabled={!srcNewHostEditable} />
 				<button
@@ -187,7 +188,7 @@
 						}
 					}}
 				>
-					Add
+					{$t('cards.add')}
 				</button>
 			</div>
 		</div>
@@ -205,7 +206,7 @@
 		{/each}
 		<!-- --- -->
 		<h3 class="font-mono mb-2 mt-6 flex flex-row items-center">
-			<span>Destinations:</span>
+			<span>{$t('cards.destinations')}</span>
 		</h3>
 		<div>
 			<TabGroup
@@ -236,7 +237,7 @@
 				<input
 					autocomplete="off"
 					class="input rounded-md mt-2"
-					placeholder="Dst Object..."
+					placeholder={$t('ui.dstObject')}
 					bind:value={dstNewHost}
 					disabled={!dstNewHostEditable} />
 				<button
@@ -253,7 +254,7 @@
 						}
 					}}
 				>
-					Add
+					{$t('cards.add')}
 				</button>
 			</div>
 		</div>
@@ -270,7 +271,7 @@
 		</div>
 		{/each}
 		<h3 class="font-mono mb-2 mt-4 flex flex-row items-center">
-			<span>Usernames:</span>
+			<span>{$t('cards.usernames')}</span>
 		</h3>
 		<MultiSelect
 			id={"ssh-rule-users-" + idx.toString()}

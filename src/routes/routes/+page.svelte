@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import CardListPage from '$lib/cards/CardListPage.svelte';
 	import CardTilePage from '$lib/cards/CardTilePage.svelte';
 	import PageHeader from '$lib/page/PageHeader.svelte';
@@ -35,7 +36,7 @@
 </script>
 
 <Page>
-	<PageHeader title="Routes" layout={App.layoutRoute} bind:filterString buttonText={""}>
+	<PageHeader title={$t('routes.title')} layout={App.layoutRoute} bind:filterString buttonText={""}>
 		{#snippet button()}
 			x
 		{/snippet}
@@ -44,15 +45,15 @@
 	<div
 		class="btn-group px-0 mx-0 py-0 my-0 rounded-md variant-ghost-secondary [&>*+*]:border-primary-500"
 	>
-		<SortBtn bind:value={sortMethod} direction={sortDirection} name="ID" {toggle} />
-		<SortBtn bind:value={sortMethod} direction={sortDirection} name="Name" {toggle} />
+		<SortBtn bind:value={sortMethod} direction={sortDirection} method="id" name="ID" {toggle} />
+		<SortBtn bind:value={sortMethod} direction={sortDirection} method="name" name={$t('common.name')} {toggle} />
 	</div>
 	<div
 		class="btn-group ml-2 px-0 mx-0 py-0 my-0 rounded-md variant-ghost-secondary [&>*+*]:border-primary-500"
 	>
-		<FilterOnlineBtn bind:value={filterOnlineStatus} status="all" name="All" />
-		<FilterOnlineBtn bind:value={filterOnlineStatus} status="online" name="Online" />
-		<FilterOnlineBtn bind:value={filterOnlineStatus} status="offline" name="Offline" />
+		<FilterOnlineBtn bind:value={filterOnlineStatus} status="all" name={$t('common.all')} />
+		<FilterOnlineBtn bind:value={filterOnlineStatus} status="online" name={$t('common.online')} />
+		<FilterOnlineBtn bind:value={filterOnlineStatus} status="offline" name={$t('common.offline')} />
 	</div>
 
 	<Outer>

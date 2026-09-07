@@ -1,3 +1,4 @@
+import { translate } from '$lib/i18n';
 import { apiPost } from './base';
 import {
 	type ApiApiKey,
@@ -22,7 +23,7 @@ export async function createApiKey() {
 
 export async function createUser(username: string): Promise<User> {
 	if (username.length === 0) {
-		throw new Error("Username cannot be empty")
+		throw new Error(translate('ui.usernameCannotBeEmpty'))
 	}
 	const data = { name: username };
 	const { user } = await apiPost<ApiUser>(API_URL_USER, data);
@@ -44,7 +45,7 @@ export async function createPreAuthKey(
 	expiration: Date | string,
 	aclTags: string[] = [],
 ) {
-	if (!user && aclTags.length === 0) throw new Error('Select a user or at least one tag');
+	if (!user && aclTags.length === 0) throw new Error(translate('ui.selectAUserOrAtLeastOneTag'));
 	const data = {
 		user: user?.id,
 		aclTags: aclTags.map((tag) => tag.startsWith('tag:') ? tag : 'tag:' + tag),

@@ -8,6 +8,12 @@ Frontend release `hs-0.29.2-2` fixes the pre-auth key list width in user details
 including the list view and tile drawer on desktop and mobile.
 Frontend release `hs-0.29.2-3` keeps node status icons at their original size
 when long node names wrap in user details.
+Frontend release `hs-0.29.2-4` adds Simplified Chinese/English localization and a
+Claude cream theme. New browsers default to Chinese, Claude and light mode.
+Existing theme and light/dark preferences remain selected after upgrade. Language
+and theme changes in Settings take effect immediately and persist across reloads.
+Translations reference [serein-213/headscale-admin-il18n](https://github.com/serein-213/headscale-admin-il18n)
+at commit `07cf626`; its API implementation is not imported.
 
 ## Compatibility changes
 
@@ -79,17 +85,17 @@ It runs checks, unit tests, a real backend and browser tests before publishing.
 Push a version tag to publish both `linux/amd64` and `linux/arm64`:
 
 ```sh
-git tag hs-0.29.2-3
-git push origin hs-0.29.2-3
+git tag hs-0.29.2-4
+git push origin hs-0.29.2-4
 ```
 
 To retry publishing an existing tag without moving it:
 
 ```sh
-gh workflow run docker-build.yml --ref main -f release_tag=hs-0.29.2-3
+gh workflow run docker-build.yml --ref main -f release_tag=hs-0.29.2-4
 ```
 
-The artifact is `ghcr.io/qingmuhy744/headscale-admin:hs-0.29.2-3`.
+The artifact is `ghcr.io/qingmuhy744/headscale-admin:hs-0.29.2-4`.
 The package must be public for an unauthenticated mirror to fetch it.
 Record the release digest and source revision before deploying. Release tags
 should be immutable; use a new suffix for subsequent changes.
@@ -99,7 +105,7 @@ should be immutable; use a new suffix for subsequent changes.
 Keep this short image name in the server's Compose file:
 
 ```yaml
-image: qingmuhy744/headscale-admin:hs-0.29.2-3
+image: qingmuhy744/headscale-admin:hs-0.29.2-4
 ```
 
 The configured `docker.1ms.run` mirror returned `not found` when pulling this short
@@ -108,8 +114,8 @@ as described in its [registry mapping documentation](https://mdoc.cc/mliev/1ms/v
 Pull through that domestic endpoint, then tag the same image with the short name:
 
 ```sh
-sudo docker pull ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-3
-sudo docker tag ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-3 qingmuhy744/headscale-admin:hs-0.29.2-3
+sudo docker pull ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-4
+sudo docker tag ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-4 qingmuhy744/headscale-admin:hs-0.29.2-4
 ```
 
 Compare the downloaded image identity and `org.opencontainers.image.revision`

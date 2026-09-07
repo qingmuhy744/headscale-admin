@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { toOptions } from '$lib/common/funcs';
     import { clickOutside } from '$lib/common/usables'
 	import { Autocomplete } from '@skeletonlabs/skeleton';
@@ -15,7 +16,7 @@
         id = $bindable(),
         items = $bindable(),
         options = undefined,
-        placeholder = "Select...",
+        placeholder = $t('ui.select'),
         onItemClick,
     }: MultiSelectProps = $props()
 

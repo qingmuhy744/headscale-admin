@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { nodeBelongsToUser } from '$lib/common/types';
 	import type { ItemTypeName, Named } from '$lib/common/types';
 	import { getTypeName, isUser, isNode } from '$lib/common/types';
@@ -23,10 +24,6 @@
 	const ToastStore = getToastStore();
 	const DrawerStore = getDrawerStore();
 
-	function titleCase(str: string) {
-		return str.toLowerCase().replace(/\b\w/g, (s) => s.toUpperCase());
-	}
-
 	async function deleteItem() {
 		show = false;
 		const name = item.name;
@@ -34,27 +31,27 @@
 
 		if (isUser(item)) {
 			if (await deleteUser(item)) {
-				toastSuccess(`Deleted User "${name}" (ID: ${id})`, ToastStore);
+				toastSuccess($t('ui.deletedUserValueIdValue', { values: { v0: String(name), v1: String(id) } }), ToastStore);
 				DrawerStore.close()
 			} else {
-				let msg = `Failed to Delete User "${name}" (${id}).`;
+				let msg = $t('ui.failedToDeleteUserValueValue', { values: { v0: String(name), v1: String(id) } });
 				if(App.nodes.value.some((node) => nodeBelongsToUser(node, item.id))){
-					msg += " Still has nodes."
+					msg += ' ' + $t('details.stillHasNodes');
 				}
 				toastError(msg, ToastStore);
 			}
 		}
 		if (isNode(item)) {
 			if (await deleteNode(item)) {
-				toastSuccess(`Deleted machine "${name}" (${id})`, ToastStore);
+				toastSuccess($t('ui.deletedMachineValueValue', { values: { v0: String(name), v1: String(id) } }), ToastStore);
 				DrawerStore.close()
 			} else {
-				toastError(`Failed to Delete Nachine "${name}" (${id})`, ToastStore);
+				toastError($t('ui.failedToDeleteNachineValueValue', { values: { v0: String(name), v1: String(id) } }), ToastStore);
 			}
 		}
 	}
 </script>
 
-<CardListEntry title={`Delete ${titleCase(prefix)}:`}>
+<CardListEntry title={$t(prefix === 'user' ? 'ui.deleteUser' : 'ui.deleteNode')}>
 	<Delete func={deleteItem} />
 </CardListEntry>

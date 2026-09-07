@@ -1,14 +1,30 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="zh-CN">
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<meta name="viewport" content="width=device-width" />
+		<script>
+			try {
+				const language = JSON.parse(localStorage.getItem('locale') ?? 'null');
+				document.documentElement.lang = typeof language === 'string' && /^en(?:-|$)/i.test(language) ? 'en' : 'zh-CN';
+				if (!['true', 'false'].includes(localStorage.getItem('modeUserPrefers'))) {
+					localStorage.setItem('modeUserPrefers', 'true');
+					localStorage.setItem('modeCurrent', 'true');
+				}
+				document.documentElement.classList.toggle('dark', localStorage.getItem('modeUserPrefers') === 'false');
+			} catch {}
+		</script>
 		%sveltekit.head%
 	</head>
-	<body data-sveltekit-preload-data="hover" data-theme="skeleton">
+	<body data-sveltekit-preload-data="hover" data-theme="claude">
 		<script>
-            document.body.dataset['theme'] = localStorage.getItem('theme') ?? 'skeleton';
+			try {
+				const theme = JSON.parse(localStorage.getItem('theme') ?? '"claude"');
+				if (typeof theme === 'string') document.body.dataset.theme = theme;
+			} catch {
+				localStorage.removeItem('theme');
+			}
 		</script>
 		<div style="display: contents" class="h-full overflow-hidden">
 			%sveltekit.body%

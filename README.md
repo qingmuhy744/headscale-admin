@@ -1,9 +1,15 @@
 # headscale-admin
 
-This fork targets **Headscale v0.29.2**. Its image tag is `hs-0.29.2-3`,
+This fork targets **Headscale v0.29.2**. Its image tag is `hs-0.29.2-4`,
 published to GitHub Container Registry under `qingmuhy744/headscale-admin`.
 See [compatibility, local acceptance, publishing and rollback](docs/headscale-0.29.2.md)
 for this fork's deployment instructions. The upstream documentation follows below.
+
+The interface defaults to Simplified Chinese and the Claude cream theme in light
+mode. Settings offers English and all existing themes; saved theme and mode choices
+are preserved. Localization follows the dictionary-based approach in
+[serein-213/headscale-admin-il18n](https://github.com/serein-213/headscale-admin-il18n),
+with portions of its GPL-3.0 translations adapted for this fork.
 
 headscale-admin is meant to be a simple, modern, and useful web interface for [juanfont/headscale](https://github.com/juanfont/headscale) - *"An open source, self-hosted implementation of the Tailscale control server."*
 

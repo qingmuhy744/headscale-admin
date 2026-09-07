@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { focus, toastError } from '$lib/common/funcs';
 	import { getToastStore } from '@skeletonlabs/skeleton';
 	import { slide } from 'svelte/transition';
@@ -43,7 +44,7 @@
 		autocomplete="off"
 		class="input rounded-md text-sm"
 		type="text"
-		placeholder="New {title} Name..."
+		placeholder="{$t('ui.new')} {title} {$t('ui.name')}"
 		{disabled}
 		bind:value={name}
 		use:focus
@@ -52,7 +53,7 @@
 		<input
 			class="input rounded-md text-sm"
 			type="text"
-			placeholder="{title} Value..."
+			placeholder="{title} {$t('ui.value')}"
 			{disabled}
 			bind:value
 		/>

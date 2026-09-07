@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { Accordion, getToastStore } from '@skeletonlabs/skeleton';
 	import { ACLBuilder, saveConfig, type AclSshRules, type AclSshRulesIndexed } from '$lib/common/acl.svelte';
 	import { debug } from '$lib/common/debug';
@@ -50,7 +51,7 @@
 		acl.createSshRule(ACLBuilder.DefaultSshRule())
 		if (acl.ssh !== undefined){
 			debug("created new SSH rule at index " + (acl.ssh.length - 1).toString())
-			toastSuccess('Created SSH Rule #' + acl.acls.length, ToastStore)
+			toastSuccess($t('ui.createdSshRule') + acl.acls.length, ToastStore)
 		}
 	}
 </script>
@@ -64,7 +65,7 @@
 				<RawMdiSave />
 			</button>
 			<button class="btn-sm rounded-md variant-filled-success" onclick={newSshRule}>
-				Create SSH Rule
+				{$t('acls.createSshRule')}
 			</button>
 		</div>
 	</div>
@@ -74,7 +75,7 @@
 			autocomplete="off"
 			type="text"
 			class="input rounded-md text-sm mb-0"
-			placeholder="Filter SSH Rules..."
+			placeholder={$t('ui.filterSshRules')}
 			bind:value={sshRuleFilterString}
 		/>
 	</div>

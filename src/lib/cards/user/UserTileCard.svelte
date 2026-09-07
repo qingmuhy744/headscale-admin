@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { nodeBelongsToUser } from '$lib/common/types';
 	import { xxHash32 } from 'js-xxhash';
 	import { type User, type Node, getUserDisplay } from '$lib/common/types';
@@ -33,13 +34,13 @@
 		</div>
 	</div>
 	<div class="flex justify-between items-center mb-2 mt-2">
-		<div class="flex items-center font-semibold">Created:</div>
+		<div class="flex items-center font-semibold">{$t('cards.created')}</div>
 		<div class="flex items-center">
 			{dateToStr(new Date(user.createdAt))}
 		</div>
 	</div>
 	<div class="flex justify-between items-center mb-2 mt-2">
-		<div class="flex items-center font-semibold">Nodes:</div>
+		<div class="flex items-center font-semibold">{$t('cards.nodes')}</div>
 		<div class="flex items-center">
 			{nodeCount}
 		</div>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t, locale, setLanguage } from '$lib/i18n';
 	import { ALL_THEMES, setTheme } from '$lib/common/themes';
 	import {
 		getTime,
@@ -49,6 +50,7 @@
 	let loading = $state(false);
 
 	const apiKeyExpirationMessage: ExpirationMessage = $derived.by(() => {
+		$locale;
 		if (apiKeyInfo.expires !== ''){
 			const td = getTimeDifference(getTime(apiKeyInfo.expires));
 			return {
@@ -79,7 +81,7 @@
 				informedUnauthorized: false,
 				informedExpiringSoon: false,
 			};
-			toastSuccess('Saved Settings', ToastStore);
+			toastSuccess($t('ui.savedSettings'), ToastStore);
 			const handler = createPopulateErrorHandler(ToastStore);
 			await App.populateApiKeyInfo().catch(handler);
 			await App.populateAll(handler, false);
@@ -92,14 +94,34 @@
 </script>
 
 <Page classes="items-start">
-	<PageHeader title="Settings" />
-	<form onsubmit={saveSettings} class="max-w-3xl mx-auto p-6 bg-white dark:bg-gray-800 shadow rounded-lg">
+	<PageHeader title={$t('settings.title')} />
+	<form onsubmit={saveSettings} class="w-full max-w-3xl mx-auto py-4 px-2">
 		<div class="space-y-6">
+			<div class="grid gap-4 sm:grid-cols-2">
+				<div>
+					<label for="language-selector" class="label">{$t('ui.interfaceLanguage')}</label>
+					<select id="language-selector" class="select mt-1" value={$locale} onchange={(event) => setLanguage(event.currentTarget.value)}>
+						<option value="zh-CN">简体中文</option>
+						<option value="en">English</option>
+					</select>
+				</div>
+				<div>
+					<label for="theme-selector" class="label">{$t('settings.theme')}</label>
+					<select id="theme-selector" class="select mt-1" bind:value={App.theme.value} onchange={() => {
+						setTheme(App.theme.value);
+						settings.theme = App.theme.value;
+					}}>
+						{#each ALL_THEMES as theme}
+							<option value={theme}>{theme === 'claude' ? $t('ui.claudeCream') : theme}</option>
+						{/each}
+					</select>
+				</div>
+			</div>
 			<div>
-				<label for="api-url" class="block text-lg font-medium text-gray-700 dark:text-gray-200">API URL</label>
+				<label for="api-url" class="block text-lg font-medium text-surface-700 dark:text-surface-200">{$t('ui.apiUrl')}</label>
 				<input
 					id="api-url"
-					class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+					class="mt-1 block w-full rounded-md border-surface-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-surface-700 dark:border-surface-600 dark:text-white"
 					type="text"
 					placeholder={page.url.origin}
 					disabled={loading}
@@ -108,22 +130,22 @@
 			</div>
 
 			<div>
-				<label for="api-key" class="block text-lg font-medium text-gray-700 dark:text-gray-200">API Key</label>
+				<label for="api-key" class="block text-lg font-medium text-surface-700 dark:text-surface-200">{$t('ui.apiKey')}</label>
 				<div class="mt-1 flex items-center">
 					<input
 						id="api-key"
-						class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+						class="min-w-0 flex-1 rounded-md border-surface-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-surface-700 dark:border-surface-600 dark:text-white"
 						type={apiKeyShow ? "text" : "password"}
-						placeholder="Enter your API Key"
+						placeholder={$t('settings.apiKeyPlaceholder')}
 						disabled={loading}
 						bind:value={settings.apiKey}
 					/>
 					<button
 						type="button"
 						disabled={loading}
-						class="ml-2 p-2 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none"
+						class="ml-2 p-2 rounded-md text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200 focus:outline-none"
 						onclick={() => { apiKeyShow = !apiKeyShow; }}
-						aria-label={apiKeyShow ? "Hide API Key" : "Show API Key"}
+						aria-label={apiKeyShow ? $t('settings.hideApiKey') : $t('settings.showApiKey')}
 					>
 						{#if apiKeyShow}
 							<RawMdiEyeOff class="w-5 h-5" />
@@ -134,7 +156,7 @@
 					<button
 						type="button"
 						disabled={loading}
-						class="ml-2 p-2 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none"
+						class="ml-2 p-2 rounded-md text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200 focus:outline-none"
 						onclick={async () => {
 							loading = true;
 							try {
@@ -143,12 +165,12 @@
 								await saveSettings();
 							} catch (error) {
 								settings.apiKey = App.apiKey.value;
-								toastError('API key rotation failed', ToastStore, error);
+								toastError($t('ui.apiKeyRotationFailed'), ToastStore, error);
 							} finally {
 								loading = false;
 							}
 						}}
-						aria-label="Refresh API Key"
+						aria-label={$t('ui.refreshApiKey')}
 					>
 						<RawMdiOrbit />
 					</button>
@@ -156,24 +178,24 @@
 				{#if apiKeyInfo.authorized !== null}
 					<div class="mt-2 text-sm">
 						<span class={apiKeyInfo.authorized ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
-							{apiKeyInfo.authorized ? "Authorized" : "Not Authorized"}
+							{apiKeyInfo.authorized ? $t('settings.authorized') : $t('settings.notAuthorized')}
 						</span>
 						{#if apiKeyInfo.authorized && apiKeyExpirationMessage}
-							<span class="ml-2 text-gray-500 dark:text-gray-400">
-								Expires in: {apiKeyExpirationMessage.message}
+							<span class="ml-2 text-surface-500 dark:text-surface-400">
+								{$t('ui.expiresIn')} {apiKeyExpirationMessage.message}
 							</span>
 						{/if}
 					</div>
 				{:else if loading}
-					<div class="mt-2 text-sm text-yellow-500 dark:text-yellow-400">Checking authorization...</div>
+					<div class="mt-2 text-sm text-yellow-500 dark:text-yellow-400">{$t('ui.checkingAuthorization')}</div>
 				{/if}
 			</div>
 
 			<div>
-				<label for="api-ttl" class="block text-lg font-medium text-gray-700 dark:text-gray-200">API Refresh Interval (seconds)</label>
+				<label for="api-ttl" class="block text-lg font-medium text-surface-700 dark:text-surface-200">{$t('ui.apiRefreshIntervalSeconds')}</label>
 				<input
 					id="api-ttl"
-					class="mt-1 block w-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+					class="mt-1 block w-32 rounded-md border-surface-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-surface-700 dark:border-surface-600 dark:text-white"
 					type="number"
 					min="1"
 					disabled={loading}
@@ -185,55 +207,38 @@
 				<input
 					id="debugging"
 					type="checkbox"
-					class="h-4 w-4 text-indigo-600 border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600"
+					class="h-4 w-4 text-primary-600 border-surface-300 rounded dark:bg-surface-700 dark:border-surface-600"
 					disabled={loading}
 					bind:checked={settings.debug}
 				/>
-				<label for="debugging" class="ml-2 block text-lg text-gray-700 dark:text-gray-200">
-					Console Debugging
+				<label for="debugging" class="ml-2 block text-lg text-surface-700 dark:text-surface-200">
+					{$t('ui.consoleDebugging')}
 				</label>
 			</div>
 
-			<div class="flex items-start justify-between space-x-4">
+			<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
 				<button type="button" class="btn btn-sm rounded-md variant-ghost-primary w-full" onclick={() => console.log(JSON.stringify(App.users.value, null, 4))}>
-					Log Users
+					{$t('settings.logUsers')}
 				</button>
 				<button type="button" class="btn btn-sm rounded-md variant-ghost-primary w-full" onclick={() => console.log(JSON.stringify(App.nodes.value, null, 4))}>
-					Log Nodes
+					{$t('settings.logNodes')}
 				</button>
 				<button type="button" class="btn btn-sm rounded-md variant-ghost-primary w-full" onclick={() => console.log(JSON.stringify(App.preAuthKeys.value, null, 4))}>
-					Log PreAuthKeys
+					{$t('ui.logPreauthkeys')}
 				</button>
 				<button type="button" class="btn btn-sm rounded-md variant-ghost-primary w-full" onclick={() => console.log(JSON.stringify(App.apiKeyInfo.value, null, 4))}>
-					Log ApiKey Info
+					{$t('ui.logApikeyInfo')}
 				</button>
-			</div>
-
-			<div>
-				<label for="theme-selector" class="block text-lg font-medium text-gray-700 dark:text-gray-200">Theme</label>
-				<select
-					id="theme-selector"
-					class="mt-1 block w-full rounded-md border-gray-300 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-					bind:value={App.theme.value}
-					onchange={() => {
-						setTheme(App.theme.value)
-						settings.theme = App.theme.value
-					}}
-				>
-					{#each ALL_THEMES as theme}
-						<option value={theme}>{theme}</option>
-					{/each}
-				</select>
 			</div>
 
 			<div class="flex justify-end">
 				<button
 					type="submit"
 					disabled={loading || !settings.apiKey}
-					class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+					class="btn variant-filled-primary disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					<RawMdiContentSaveOutline class="w-5 h-5 mr-2" />
-					Save Settings
+					{$t('settings.save')}
 				</button>
 			</div>
 		</div>

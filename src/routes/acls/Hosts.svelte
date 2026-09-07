@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import CardListPage from '$lib/cards/CardListPage.svelte';
 	import { saveConfig, type ACLBuilder } from '$lib/common/acl.svelte';
 	import { toastError, toastSuccess } from '$lib/common/funcs';
@@ -29,7 +30,7 @@
 		loading = true;
 		try {
 			acl.createHost(newHostName, newHostCIDR);
-			toastSuccess(`Host '${newHostName}' created`, ToastStore);
+			toastSuccess($t('ui.hostValueCreated', { values: { v0: String(newHostName) } }), ToastStore);
 			newHostName = '';
 			newHostCIDR = '';
 			showCreateHost = false;
@@ -69,12 +70,12 @@
 				<RawMdiSave />
 			</button>
 			<button class="btn-sm rounded-md variant-filled-success" onclick={toggleShowCreateHost}>
-				Create Host
+				{$t('acls.createHost')}
 			</button>
 		</div>
 		{#if showCreateHost}
 			<NewItem
-				title="Host"
+				title={$t('cards.host')}
 				disabled={loading}
 				bind:name={newHostName}
 				bind:value={newHostCIDR}
@@ -90,7 +91,7 @@
 			autocomplete="off"
 			type="text"
 			class="input rounded-md text-sm mb-0"
-			placeholder="Filter Hosts..."
+			placeholder={$t('ui.filterHosts')}
 			bind:value={hostsFilter}
 		/>
 	</div>

@@ -1,3 +1,5 @@
+import { translate, locale } from '$lib/i18n';
+import { get } from 'svelte/store';
 import type { DrawerStore, ToastStore } from '@skeletonlabs/skeleton';
 import type { DrawerSettings } from '@skeletonlabs/skeleton';
 import IPAddr from 'ipaddr.js';
@@ -99,7 +101,7 @@ export function getTime(
 
 export function getTimeDifferenceMessage(time1: number): string {
 	const difference = getTimeDifference(time1, new Date().getTime());
-	return difference.finite ? difference.message : 'Does Not Expire';
+	return difference.finite ? difference.message : translate('ui.doesNotExpire');
 }
 
 export function getTimeDifferenceColor(td: TimeDifference): string {
@@ -115,14 +117,13 @@ export function getTimeDifference(time1: number, time2?: number): TimeDifference
 		return {
 			future: true,
 			finite: false,
-			message: 'Does Not Expire',
+			message: translate('ui.doesNotExpire'),
 		};
 	}
 
 	time2 = Math.floor(time2 / 1000) * 1000;
 	let difference = time1 - time2;
 	const isFuture = difference > 0;
-	let message = '';
 
 	difference = Math.abs(difference);
 	const seconds = Math.floor(difference / 1000);
@@ -132,24 +133,18 @@ export function getTimeDifference(time1: number, time2?: number): TimeDifference
 	const weeks = Math.floor(days / 7);
 	const months = Math.floor(weeks / 4);
 
-	if (months > 0) {
-		message = `${months} month${months == 1 ? '' : 's'}`;
-	} else if (weeks > 0) {
-		message = `${weeks} week${weeks == 1 ? '' : 's'}`;
-	} else if (days > 0) {
-		message = `${days} day${days == 1 ? '' : 's'}`;
-	} else if (hours > 0) {
-		message = `${hours} hour${hours == 1 ? '' : 's'}`;
-	} else if (minutes > 0) {
-		message = `${minutes} minute${minutes == 1 ? '' : 's'}`;
-	} else {
-		message = `${seconds} second${seconds == 1 ? '' : 's'}`;
-	}
+	const units: [number, Intl.RelativeTimeFormatUnit][] = [
+		[months, 'month'], [weeks, 'week'], [days, 'day'],
+		[hours, 'hour'], [minutes, 'minute'], [seconds, 'second'],
+	];
+	const [amount, unit] = units.find(([amount]) => amount > 0) ?? [0, 'second'];
+	const message = new Intl.RelativeTimeFormat(get(locale) ?? 'zh-CN', { numeric: 'always' })
+		.format(isFuture ? amount : -amount, unit);
 
 	return {
 		future: isFuture,
 		finite: true,
-		message: message + ` ${isFuture ? 'from now' : 'ago'}`,
+		message,
 	};
 }
 
@@ -158,7 +153,7 @@ export function dateToStr(d: Date | string) {
 		d = new Date(d);
 	}
 
-	return d.toLocaleString('en-US', {
+	return d.toLocaleString(get(locale) ?? 'zh-CN', {
 		day: '2-digit',
 		month: '2-digit',
 		year: 'numeric',
@@ -200,7 +195,7 @@ export function toastError(message: string, toastStore: ToastStore, error?: unkn
 export function copyToClipboard(
 	s: string,
 	toastStore?: ToastStore,
-	toastMessage = 'Copied to Clipboard!',
+	toastMessage = translate('ui.copiedToClipboard'),
 ) {
 	navigator.clipboard
 		.writeText(s)
@@ -211,7 +206,7 @@ export function copyToClipboard(
 		})
 		.catch(() => {
 			if (toastStore) {
-				toastError('Failed to copy to clipboard!', toastStore);
+				toastError(translate('ui.failedToCopyToClipboard'), toastStore);
 			}
 		});
 }

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { Drawer, getDrawerStore } from '@skeletonlabs/skeleton';
 	import DrawerEntry from './DrawerEntry.svelte';
 	import UserInfo from '$lib/cards/user/UserInfo.svelte';
@@ -23,7 +24,7 @@
 			</DrawerEntry>
 		{/if}
 		{#if $drawerStore?.id?.startsWith('navDrawer')}
-			<DrawerEntry title="Navigation">
+			<DrawerEntry title={$t('navigation.title')}>
 				<Navigation />
 			</DrawerEntry>
 		{/if}

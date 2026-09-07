@@ -7,6 +7,7 @@ const auth = { Authorization: `Bearer ${env.TEST_API_KEY}` };
 
 async function login(page: Page, key = env.TEST_API_KEY) {
   await page.goto('/admin/settings');
+  await page.locator('#language-selector').selectOption('en');
   await page.getByLabel('API URL', { exact: true }).fill('http://127.0.0.1:18080');
   await page.getByLabel('API Key', { exact: true }).fill(key);
   await page.getByRole('button', { name: 'Save Settings' }).click();

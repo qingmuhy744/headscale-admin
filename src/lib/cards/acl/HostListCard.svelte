@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import RawMdiAlert from '~icons/mdi/alert';
 	import { getToastStore, popup, type PopupSettings } from '@skeletonlabs/skeleton';
 	import type { ACLBuilder } from '$lib/common/acl.svelte';
@@ -74,7 +75,7 @@
 	function deleteHost() {
 		try {
 			acl.deleteHost(host.name);
-			toastSuccess(`Host '${host.name}' deleted`, ToastStore);
+			toastSuccess($t('ui.hostValueDeleted', { values: { v0: String(host.name) } }), ToastStore);
 		} catch (e) {
 			debug(e);
 			if (e instanceof Error) {
@@ -108,7 +109,7 @@
 	class="card p-4 variant-filled-warning text-center {popupShow ? '' : 'invisible'}"
 	data-popup="popupHover-host-{hostName}"
 >
-	<p>Host '{hostName}' has the same name as a user.<br />Please rename the host.</p>
+	<p>{$t('ui.host')}{hostName}{$t('ui.hasTheSameNameAsAUser')}<br />{$t('ui.pleaseRenameTheHost')}</p>
 	<div class="arrow variant-filled-warning"></div>
 </div>
 

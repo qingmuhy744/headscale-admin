@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { getModalStore } from "@skeletonlabs/skeleton";
 
     type LoaderModalProps = {
@@ -41,8 +42,8 @@
     <footer class="modal-footer flex items-center justify-between border border-surface-500 p-4 rounded-container-token">
         <span class="text-error-400 dark:text-error-200">{errorMessage}</span>
         <div class="flex space-x-2">
-            <button class="btn rounded-md variant-soft-error" onclick={cancel}>Cancel</button>
-            <button class="btn rounded-md variant-soft-success" onclick={save}>Save</button>
+            <button class="btn rounded-md variant-soft-error" onclick={cancel}>{$t('common.cancel')}</button>
+            <button class="btn rounded-md variant-soft-success" onclick={save}>{$t('common.save')}</button>
         </div>
     </footer>
 </div>

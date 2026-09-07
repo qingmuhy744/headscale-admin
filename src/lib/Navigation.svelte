@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { base } from '$app/paths';
 	import { getDrawerStore } from '@skeletonlabs/skeleton';
 
@@ -42,16 +43,16 @@
 		logo: Component;
 	};
 
-	const allPages: Page[] = [
-		{ path: '/', name: 'Home', logo: RawMdiHome },
-		{ path: '/users', name: 'Users', logo: RawMdiPerson },
-		{ path: '/nodes', name: 'Nodes', logo: RawMdiDevices },
-		{ path: '/keys', name: 'Keys', logo: RawMdiKey },
-		{ path: '/deploy', name: 'Deploy', logo: RawMdiHomeGroupPlus },
-		{ path: '/routes', name: 'Routes', logo: RawMdiRouter },
-		{ path: '/acls', name: 'ACLs', logo: RawMdiSecurity },
-		{ path: '/settings', name: 'Settings', logo: RawMdiSettings },
-	].filter((p) => p != undefined);
+	const allPages: Page[] = $derived([
+		{ path: '/', name: $t('home.title'), logo: RawMdiHome },
+		{ path: '/users', name: $t('users.title'), logo: RawMdiPerson },
+		{ path: '/nodes', name: $t('nodes.title'), logo: RawMdiDevices },
+		{ path: '/keys', name: $t('ui.keys'), logo: RawMdiKey },
+		{ path: '/deploy', name: $t('deploy.title'), logo: RawMdiHomeGroupPlus },
+		{ path: '/routes', name: $t('routes.title'), logo: RawMdiRouter },
+		{ path: '/acls', name: $t('acls.title'), logo: RawMdiSecurity },
+		{ path: '/settings', name: $t('settings.title'), logo: RawMdiSettings },
+	]);
 
 	const pages = $derived.by(() => App.hasValidApi ? allPages : allPages.slice(-1));
 </script>

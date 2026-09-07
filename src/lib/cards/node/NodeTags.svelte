@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { InputChip, getToastStore } from '@skeletonlabs/skeleton';
 	import type { Node } from '$lib/common/types';
 	import { setNodeTags } from '$lib/common/api';
@@ -16,7 +17,7 @@
 	$effect(() => { if (!editing) tags = node.tags.map((tag) => tag.replace(/^tag:/, '')); });
 
 	async function saveTags() {
-		if (node.tags.length === 0 && !window.confirm('Assign tags and permanently replace user ownership?')) return;
+		if (node.tags.length === 0 && !window.confirm($t('ui.assignTagsAndPermanentlyReplaceUserOwnership'))) return;
 		pending = true;
 		try {
 			const updated = await setNodeTags(node, tags);
@@ -24,23 +25,23 @@
 			node = updated;
 			editing = false;
 		} catch (error) {
-			toastError('Unable to save tags', toastStore, error);
+			toastError($t('ui.unableToSaveTags'), toastStore, error);
 		} finally {
 			pending = false;
 		}
 	}
 </script>
 
-<CardListEntry top title="Tags:">
+<CardListEntry top title={$t('cards.tags')}>
 	<div class="w-full min-w-0 space-y-2">
-		<InputChip name="node-tags-{node.id}" aria-label="Node tags" disabled={pending} bind:value={tags}
+		<InputChip name="node-tags-{node.id}" aria-label={$t('ui.nodeTags')} disabled={pending} bind:value={tags}
 			class="w-full" chips="variant-filled-success"
 			on:add={() => editing = true} on:remove={() => editing = true} />
 		{#if editing}
 			<div class="flex justify-end gap-2">
-				<button type="button" class="btn-icon btn-sm" title="Save tags" aria-label="Save tags"
+				<button type="button" class="btn-icon btn-sm" title={$t('ui.saveTags')} aria-label={$t('ui.saveTags')}
 					disabled={pending || tags.length === 0} onclick={saveTags}><RawMdiSave /></button>
-				<button type="button" class="btn-icon btn-sm" title="Cancel tag changes" aria-label="Cancel tag changes"
+				<button type="button" class="btn-icon btn-sm" title={$t('ui.cancelTagChanges')} aria-label={$t('ui.cancelTagChanges')}
 					disabled={pending} onclick={() => editing = false}><RawMdiClose /></button>
 			</div>
 		{/if}

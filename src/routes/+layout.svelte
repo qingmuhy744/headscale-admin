@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import Navigation from '$lib/Navigation.svelte';
 	import RawMdiGithub from '~icons/mdi/github';
+	import RawMdiMenu from '~icons/mdi/menu';
 	import '../app.postcss';
 	import {
 		AppBar,
@@ -45,14 +47,15 @@
 	import { createPopulateErrorHandler } from '$lib/common/errors';
 	import { version } from '$lib/common/debug';
 	import { App } from '$lib/States.svelte';
-	import { setTheme } from '$lib/common/themes';
+	import { ALL_THEMES, DEFAULT_THEME, setTheme } from '$lib/common/themes';
 
 	let { children } = $props()
 
 	let ToastStore = $state(getToastStore());
 
 	onMount(() => {
-		setTheme(App.theme.value || 'skeleton')
+		if (!ALL_THEMES.includes(App.theme.value)) App.theme.value = DEFAULT_THEME;
+		setTheme(App.theme.value)
 		App.populateAll(createPopulateErrorHandler(ToastStore), true)
 
 		if (!App.hasValidApi) {
@@ -67,39 +70,43 @@
 <AppShell slotSidebarLeft="w-0 mr-2 lg:w-48" scrollGutter="stable both-edges">
 	<svelte:fragment slot="header">
 		<!-- App Bar -->
-		<AppBar>
+		<AppBar
+			gridColumns="grid-cols-[minmax(0,1fr)_auto]"
+			gap="gap-2 sm:gap-4"
+			slotDefault="hidden"
+			slotTrail="space-x-2 sm:space-x-4"
+		>
 			<svelte:fragment slot="lead">
-				<div>
+				<div class="flex min-w-0 items-center gap-2">
 					<button
-						aria-label="open navigation panel"
-						class="lg:hidden btn btn-sm mr-4"
+						aria-label={$t('ui.openNavigationPanel')}
+						title={$t('ui.openNavigationPanel')}
+						class="lg:hidden btn-icon btn-icon-sm shrink-0"
 						onclick={() => {
 							DrawerStore.open(drawerSettings);
 						}}
 					>
-						<span>
-							<svg viewBox="0 0 100 80" class="fill-token w-4 h-4">
-								<rect width="100" height="20" />
-								<rect y="30" width="100" height="20" />
-								<rect y="60" width="100" height="20" />
-							</svg>
-						</span>
+						<RawMdiMenu />
 					</button>
-					<strong class="text-xl uppercase">Headscale-Admin</strong>
-					<span class="text-sm lowercase">{version}</span>
+					<div class="min-w-0">
+						<strong class="block text-sm sm:inline sm:text-xl uppercase">Headscale-Admin</strong>
+						<span class="text-xs sm:text-sm lowercase">{version}</span>
+					</div>
 				</div>
 			</svelte:fragment>
 
 			<svelte:fragment slot="trail">
-				<LightSwitch />
+				<LightSwitch title={$t('ui.toggleLightOrDarkMode')} />
 				<a
 					class="btn btn-sm variant-ghost-surface"
+					aria-label="GitHub"
+					title="GitHub"
 					href="https://github.com/qingmuhy744/headscale-admin"
 					target="_blank"
 					rel="noreferrer"
 				>
-					<RawMdiGithub class="mr-2" />
-					GitHub
+					<RawMdiGithub class="shrink-0 sm:mr-2" />
+					<span class="hidden sm:inline">GitHub</span>
 				</a>
 			</svelte:fragment>
 		</AppBar>

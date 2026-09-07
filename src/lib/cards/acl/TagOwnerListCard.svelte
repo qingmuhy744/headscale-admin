@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { getPolicyUser } from '$lib/common/types';
 	import { getToastStore } from '@skeletonlabs/skeleton';
 	import type { ACLBuilder } from '$lib/common/acl.svelte';
@@ -58,7 +59,7 @@
 		try {
 			if (tag.name !== tagNameNew) {
 				acl.renameTag(tag.name, tagNameNew);
-				toastSuccess(`Tag renamed from '${tag.name}' to '${tagNameNew}'`, ToastStore);
+				toastSuccess($t('ui.tagRenamedFromValueToValue', { values: { v0: String(tag.name), v1: String(tagNameNew) } }), ToastStore);
 				tagName = tagNameNew;
 			}
 			return true;
@@ -77,7 +78,7 @@
 		loading = true
 		try{
 			acl.deleteTag(tag.name);
-			toastSuccess(`Tag '${tag.name}' deleted`, ToastStore)
+			toastSuccess($t('ui.tagValueDeleted', { values: { v0: String(tag.name) } }), ToastStore)
 		}catch(e){
 			if(e instanceof Error){
 				toastError('', ToastStore, e);
@@ -102,7 +103,7 @@
 	{#snippet children()}
 	<CardListContainer>
 		<h3 class="font-mono mb-4 flex flex-row items-center">
-			<span>Owners of</span>
+			<span>{$t('ui.ownersOf')}</span>
 			<Text
 				bind:value={tag.name}
 				bind:valueNew={tagNameNew}
@@ -115,7 +116,7 @@
 			id={"tag-" + tagName + "-select"}
 			bind:items={tag.owners}
 			options={options}
-			placeholder={"Select owners of " + tagName + "..."}
+			placeholder={$t('details.selectOwners', { values: { name: tagName } })}
 			onItemClick={removeMember}
 		/>
 		<div class="pt-4">

@@ -1,4 +1,5 @@
 import { beforeEach, afterEach, describe, it, expect, vi } from 'vitest';
+import { setLanguage } from '$lib/i18n';
 vi.mock('$lib/States.svelte', () => import('../../../tests/app'));
 import { App } from '../../../tests/app';
 import { ACLBuilder } from './acl.svelte';
@@ -8,6 +9,7 @@ import { apiGet, createNode, createPreAuthKey, deletePreAuthKey, expirePreAuthKe
 const json = (value: unknown, status = 200) => new Response(JSON.stringify(value), { status });
 const fetchMock = vi.fn<typeof fetch>();
 beforeEach(() => {
+  setLanguage('en');
   fetchMock.mockReset();
   vi.stubGlobal('fetch', fetchMock);
   App.apiUrl.value = 'http://headscale.test';

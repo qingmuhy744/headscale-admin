@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { nodeBelongsToUser } from '$lib/common/types';
 	import CardListEntry from '../CardListEntry.svelte';
 	import type { Node, User } from '$lib/common/types';
@@ -13,7 +14,7 @@
 	}
 	let {
 		user = $bindable(),
-		title = 'Nodes:',
+		title = $t('cards.nodes'),
 	}: UserListNodesProps = $props();
 
 	const drawerStore = getDrawerStore();

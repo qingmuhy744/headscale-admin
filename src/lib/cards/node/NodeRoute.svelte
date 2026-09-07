@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { disableRoutes, enableRoutes } from '$lib/common/api';
 	import type { Node } from '$lib/common/types';
 
@@ -45,8 +46,8 @@
 <div class="flex flex-row col-span-6 text-end items-center justify-end">
 	<button
 		type="button"
-		aria-label="{approved ? 'Revoke' : 'Approve'} route {route}"
-		title="{approved ? 'Revoke' : 'Approve'} route {route}"
+		aria-label="{approved ? $t('ui.revoke') : $t('ui.approve')} {$t('ui.route')} {route}"
+		title="{approved ? $t('ui.revoke') : $t('ui.approve')} {$t('ui.route')} {route}"
 		aria-pressed={approved}
 		{disabled}
 		class="btn {approved
@@ -61,7 +62,7 @@
 					await enableRoutes(node, route);
 				}
 			} catch (error) {
-				toastError('Unable to update route', toastStore, error);
+				toastError($t('ui.unableToUpdateRoute'), toastStore, error);
 			} finally {
 				loading = false;
 			}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { xxHash32 } from 'js-xxhash';
 	import type { Node } from '$lib/common/types';
 	import { onMount } from 'svelte';
@@ -52,30 +53,30 @@
 			{node.givenName}
 		</div>
 	</div>
-	<CardTileEntry title="Created:">
+	<CardTileEntry title={$t('cards.created')}>
 		{dateToStr(node.createdAt)}
 	</CardTileEntry>
-	<CardTileEntry title="Last Seen:">
+	<CardTileEntry title={$t('cards.lastSeen')}>
 		{#if node.online}
-			Online Now
+			{$t('cards.onlineNow')}
 		{:else}
 			{lastSeen}
 		{/if}
 	</CardTileEntry>
-	<CardTileEntry title="User:">
+	<CardTileEntry title={$t('cards.user')}>
 		<div class="flex flex-row gap-3 items-center">
-			{node.tags.length ? 'Tagged device' : node.user?.name || 'Unassigned'}
+			{node.tags.length ? $t('ui.taggedDevice') : node.user?.name || $t('ui.unassigned')}
 			{#if node.tags.length === 0 && node.user}
 				<OnlineUserIndicator user={node.user} />
 			{/if}
 		</div>
 	</CardTileEntry>
-	<CardTileEntry title="IPv4 Address:">
+	<CardTileEntry title={$t('cards.ipv4Address')}>
 		<div class="flex flex-row gap-3 items-center">
 			{node.ipAddresses.filter((s) => /^\d+\.\d+\.\d+\.\d+$/.test(s)).at(0)}
 		</div>
 	</CardTileEntry>
-	<CardTileEntry title="Routes:">
+	<CardTileEntry title={$t('cards.routes')}>
 		{routeCount}
 	</CardTileEntry>
 	<hr style="background-color: #{color}" class="w-full h-0.5 mx-auto my-4 border-0 rounded" />

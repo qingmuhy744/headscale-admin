@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { createUser } from '$lib/common/api';
 	import { toastError, toastSuccess, focus } from '$lib/common/funcs';
 	import { App } from '$lib/States.svelte';
@@ -22,12 +23,12 @@
 		try {
 			const u = await createUser(username);
 			App.users.value.push(u)
-			toastSuccess('Created user "' + username + '"', toastStore);
+			toastSuccess($t('ui.createdUser', { values: { name: username } }), toastStore);
 			show = false;
 			username = '';
 		} catch (error) {
 			if (error instanceof Error) {
-				toastError('Failed to create user "' + username + '"', toastStore, error);
+				toastError($t('ui.failedToCreateUser', { values: { name: username } }), toastStore, error);
 			}
 		} finally {
 			loading = false;
@@ -40,7 +41,7 @@
 		<input
 			class="input rounded-md w-full md:w-1/2 lg:w-1/3"
 			type="text"
-			placeholder="New Username..."
+			placeholder={$t('common.newUsername')}
 			disabled={loading}
 			bind:value={username}
 			use:focus

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import CardListEntry from '../CardListEntry.svelte';
 	import Delete from '$lib/parts/Delete.svelte';
 	import type { Node } from '$lib/common/types';
@@ -27,7 +28,7 @@
 	});
 </script>
 
-<CardListEntry title="Expires:">
+<CardListEntry title={$t('cards.expires')}>
 	<div class="flex flex-row items-start text-right justify-end">
 		<span class=" {getTimeDifferenceColor(diff)} items-center">
 			{diff.message}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { Accordion, getToastStore } from '@skeletonlabs/skeleton';
 	import { saveConfig, type ACLBuilder } from '$lib/common/acl.svelte';
 	import { debug } from '$lib/common/debug';
@@ -37,7 +38,7 @@
 		loading = true;
 		try {
 			acl.createGroup(newGroupName);
-			toastSuccess(`Group '${newGroupName}' created`, ToastStore);
+			toastSuccess($t('ui.groupValueCreated', { values: { v0: String(newGroupName) } }), ToastStore);
 			newGroupName = '';
 			showCreateGroup = false;
 		} catch (e) {
@@ -64,12 +65,12 @@
 				<RawMdiSave />
 			</button>
 			<button class="btn-sm rounded-md variant-filled-success" onclick={toggleShowCreateGroup}>
-				Create Group
+				{$t('acls.createGroup')}
 			</button>
 		</div>
 		{#if showCreateGroup}
 			<NewItem
-				title="Group"
+				title={$t('cards.group')}
 				disabled={loading}
 				bind:name={newGroupName}
 				submit={newGroup}
@@ -82,7 +83,7 @@
 			autocomplete="off"
 			type="text"
 			class="input rounded-md text-sm mb-0"
-			placeholder="Filter Groups..."
+			placeholder={$t('ui.filterGroups')}
 			bind:value={groupsFilterString}
 		/>
 	</div>

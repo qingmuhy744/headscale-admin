@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { getTime, getTimeDifferenceMessage } from '$lib/common/funcs';
 	import type { Node } from '$lib/common/types';
 	import { onMount } from 'svelte';
@@ -21,9 +22,9 @@
 	});
 </script>
 
-<CardListEntry title="Last Seen:">
+<CardListEntry title={$t('cards.lastSeen')}>
 	{#if node.online}
-		Online Now
+		{$t('cards.onlineNow')}
 	{:else}
 		{lastSeen}
 	{/if}

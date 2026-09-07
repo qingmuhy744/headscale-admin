@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t, locale } from '$lib/i18n';
 	import CardListEntry from '../CardListEntry.svelte';
 	import type { Named } from '$lib/common/types';
 
@@ -10,8 +11,8 @@
 
 </script>
 
-<CardListEntry title="Created:">
-	{new Date(item.createdAt).toLocaleString('en-Gb', {
+<CardListEntry title={$t('cards.created')}>
+	{new Date(item.createdAt).toLocaleString($locale ?? 'zh-CN', {
 		minute: '2-digit',
 		year: 'numeric',
 		month: 'short',

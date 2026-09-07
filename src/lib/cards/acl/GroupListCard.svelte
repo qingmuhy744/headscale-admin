@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { getPolicyUser } from '$lib/common/types';
 	import type { ACLBuilder } from '$lib/common/acl.svelte';
 	import ListEntry from './ListEntry.svelte';
@@ -46,7 +47,7 @@
 		try {
 			if (groupName !== groupNameNew) {
 				acl.renameGroup(groupName, groupNameNew);
-				toastSuccess(`Group renamed from '${groupName}' to '${groupNameNew}'`, ToastStore);
+				toastSuccess($t('ui.groupRenamedFromValueToValue', { values: { v0: String(groupName), v1: String(groupNameNew) } }), ToastStore);
 				groupName = groupNameNew;
 			}
 			return true;
@@ -62,7 +63,7 @@
 		deleting = true;
 		try {
 			acl.deleteGroup(groupName);
-			toastSuccess(`Group '${groupName}' deleted`, ToastStore);
+			toastSuccess($t('ui.groupValueDeleted', { values: { v0: String(groupName) } }), ToastStore);
 		} catch (e) {
 			if (e instanceof Error) {
 				toastError('', ToastStore, e);
@@ -96,7 +97,7 @@
 	{#snippet children()}
 	<CardListContainer>
 		<h3 class="font-mono mb-4 flex flex-row items-center">
-			<span>Members of</span>
+			<span>{$t('ui.membersOf')}</span>
 			<Text
 				bind:value={group.name}
 				bind:valueNew={groupNameNew}
@@ -109,7 +110,7 @@
 			bind:items={group.members}
 			options={userNames}
 			id={"group-" + groupName + "-select"}
-			placeholder={"Select members of " + groupName + "..."}
+			placeholder={$t('details.selectMembers', { values: { name: groupName } })}
 			onItemClick={removeMember}
 		/>
 		<div class="pt-4">

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { createNode } from '$lib/common/api';
 	import { debug } from '$lib/common/debug';
 	import { toastError, toastSuccess, focus } from '$lib/common/funcs';
@@ -22,7 +23,7 @@
 	async function newNode(event: SubmitEvent) {
 		event.preventDefault();
 		if (nodekey == '' || username == '') {
-			toastError('Username and Device Key are Required', ToastStore);
+			toastError($t('ui.usernameAndDeviceKeyAreRequired'), ToastStore);
 			return;
 		}
 		loading = true;
@@ -34,7 +35,7 @@
 			App.nodes.value.push(n)
 
 			// success message
-			toastSuccess('Created node "' + n.name + '"', ToastStore);
+			toastSuccess($t('ui.createdNode', { values: { name: n.name } }), ToastStore);
 
 			// no longer needed
 			show = false;
@@ -42,7 +43,7 @@
 		} catch (error) {
 			if (error instanceof Error) {
 				debug(error);
-				toastError('Failed to create node', ToastStore, error);
+				toastError($t('common.failedCreateNode'), ToastStore, error);
 			}
 		} finally {
 			loading = false;
@@ -55,7 +56,7 @@
 		<input
 			class="input rounded-md w-full md:w-1/2 lg:w-1/3"
 			type="text"
-			placeholder="Registration key (hskey-authreq-...)"
+			placeholder={$t('ui.registrationKeyHskeyAuthreq')}
 			disabled={loading}
 			bind:value={nodekey}
 			use:focus

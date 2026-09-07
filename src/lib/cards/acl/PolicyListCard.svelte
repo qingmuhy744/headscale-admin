@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { getPolicyUser } from '$lib/common/types';
 	import { Autocomplete, getToastStore, TabGroup } from '@skeletonlabs/skeleton';
 	import { ACLBuilder, HAMetaDefault, type AclPolicy } from '$lib/common/acl.svelte';
@@ -85,13 +86,13 @@
 	let tabSetSrc = $state(0)
 	let tabSetDst = $state(0)
 
-	const tabs = [
-		{ name: "custom", title: "Custom", logo: RawMdiPencil },
-		{ name: "user", title: "User", logo: RawMdiTag },
-		{ name: "host", title: "Host", logo: RawMdiDevices },
-		{ name: "group", title: "Group", logo: RawMdiGroups },
-		{ name: "tag", title: "Tag", logo: RawMdiTag },
-	]
+	const tabs = $derived([
+		{ name: "custom", title: $t('cards.custom'), logo: RawMdiPencil },
+		{ name: "user", title: $t('common.user'), logo: RawMdiTag },
+		{ name: "host", title: $t('cards.host'), logo: RawMdiDevices },
+		{ name: "group", title: $t('cards.group'), logo: RawMdiGroups },
+		{ name: "tag", title: $t('cards.tag'), logo: RawMdiTag },
+	])
 	
 	const srcNewType = $derived(tabs[tabSetSrc].name)
 	let srcNewHost = $state('')
@@ -122,7 +123,7 @@
 		loading = true;
 		try {
 			acl.delPolicy(idx)
-			toastSuccess(`Policy #'${idx+1}' has been deleted`, ToastStore);
+			toastSuccess($t('ui.policyValueHasBeenDeleted', { values: { v0: String(idx+1) } }), ToastStore);
 		} catch (e) {
 			if (e instanceof Error) {
 				toastError('', ToastStore, e);
@@ -143,7 +144,7 @@
 
 	function addSrc(host: string) {
 		if (host.length === 0) {
-			throw new Error("Invailid Host Provided")
+			throw new Error($t('ui.invailidHostProvided'))
 		}
 
 		policy.src.push(host)
@@ -151,7 +152,7 @@
 
 	function addDst(host: string, ports: string) {
 		if (host.length === 0) {
-			throw new Error("Invailid Host Provided")
+			throw new Error($t('ui.invailidHostProvided'))
 		}
 
 		if (policy.proto === "icmp") {
@@ -167,11 +168,11 @@
 			const n = parseInt(p, 10)
 
 			if (isNaN(n)) {
-				throw new Error("Invalid Port Number Provided")
+				throw new Error($t('ui.invalidPortNumberProvided'))
 			}
 
 			if (n < 1 || n > 65535) {
-				throw new Error("Invalid Port Number Provided")
+				throw new Error($t('ui.invalidPortNumberProvided'))
 			}
 		}
 
@@ -221,7 +222,7 @@
 		<CardListContainer>
 			<div class="mb-6">
 				<h3 class="font-mono mb-2 flex flex-row items-center">
-					<label for="policy-name">Name:</label>
+					<label for="policy-name">{$t('cards.name')}</label>
 					<input
 						type="text" 
 						name="policy-name"
@@ -232,13 +233,13 @@
 					/>
 				</h3>
 				<h3 class="font-mono mb-2 flex flex-row items-center">
-					<span>Protocol:</span>
+					<span>{$t('cards.protocol')}</span>
 				</h3>
 				<div>
 					<div class="btn-group text-sm rounded-md variant-soft">
 						<button
 							class={"btn-sm hover:variant-soft-primary " + (policy.proto === undefined ? "variant-soft-primary" : "")}
-							onclick={()=>{ policy.proto = undefined }}>Any</button>
+							onclick={()=>{ policy.proto = undefined }}>{$t('cards.any')}</button>
 						<button
 							class={"btn-sm hover:variant-soft-primary " + (policy.proto === "tcp" ? "variant-soft-primary" : "")}
 							onclick={()=>{ policy.proto = "tcp" }}>TCP</button>
@@ -252,7 +253,7 @@
 				</div>
 			</div>
 			<h3 class="font-mono mb-2 flex flex-row items-center">
-				<span>Sources:</span>
+				<span>{$t('cards.sources')}</span>
 			</h3>
 			<div>
 				<TabGroup
@@ -283,7 +284,7 @@
 					<input
 						autocomplete="off"
 						class="input rounded-md mt-2"
-						placeholder="Src Object..."
+						placeholder={$t('ui.srcObject')}
 						bind:value={srcNewHost}
 						disabled={!srcNewHostEditable} />
 					<button
@@ -300,7 +301,7 @@
 							}
 						}}
 					>
-						Add
+						{$t('cards.add')}
 					</button>
 				</div>
 			</div>
@@ -318,7 +319,7 @@
 			{/each}
 			<!-- --- -->
 			<h3 class="font-mono mb-2 mt-6 flex flex-row items-center">
-				<span>Destinations:</span>
+				<span>{$t('cards.destinations')}</span>
 			</h3>
 			<div>
 				<TabGroup
@@ -349,13 +350,13 @@
 					<input
 						autocomplete="off"
 						class="input rounded-md mt-2"
-						placeholder="Dst Object..."
+						placeholder={$t('ui.dstObject')}
 						bind:value={dstNewHost}
 						disabled={!dstNewHostEditable} />
 					<input
 						autocomplete="off"
 						class="input rounded-md mt-2"
-						placeholder="Dst Ports..."
+						placeholder={$t('ui.dstPorts')}
 						bind:value={dstNewPorts}
 						disabled={!dstNewPortsEditable} />
 					<button
@@ -373,7 +374,7 @@
 							}
 						}}
 					>
-						Add
+						{$t('cards.add')}
 					</button>
 				</div>
 			</div>

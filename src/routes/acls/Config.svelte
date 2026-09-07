@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import CardListPage from "$lib/cards/CardListPage.svelte";
 	import { ACLBuilder, saveConfig, type ACL } from "$lib/common/acl.svelte";
     import { isTextContent, JSONEditor, Mode, type TextContent } from 'svelte-jsoneditor'
@@ -49,22 +50,22 @@
             acl = ACLBuilder.fromPolicy(config.text)
             editing = false
         } catch (error) {
-            toastError('Invalid policy', ToastStore, error)
+            toastError($t('ui.invalidPolicy'), ToastStore, error)
         }
     }
 
     function resetConfig() {
-        if (window.confirm('Replace the entire policy with the default policy?')) acl = ACLBuilder.defaultACL()
+        if (window.confirm($t('ui.replaceTheEntirePolicyWithTheDefaultPolicy'))) acl = ACLBuilder.defaultACL()
     }
 
     function loadConfig() {
         loading = true
 		getPolicy().then(policy => {
 			acl = ACLBuilder.fromPolicy(JWCC.parse<ACL>(policy))
-            toastSuccess("Loaded ACL policy from server", ToastStore)
+            toastSuccess($t('ui.loadedAclPolicyFromServer'), ToastStore)
 		}).catch(reason => {
 			debug("failed to get policy:", reason)
-			toastError(`Unable to get ACL policy from server.`, ToastStore, reason)
+			toastError($t('details.loadPolicyError'), ToastStore, reason)
 		}).finally(() => {
             loading = false
         })
@@ -87,10 +88,10 @@
 		<button disabled={loading || editing} class="btn-sm rounded-md variant-filled-success disabled:opacity-50 w-32" onclick={() => { 
             saveConfig(acl, ToastStore, {setLoadingTrue: () => { loading = true}, setLoadingFalse: ()=> { loading = false }})
         }}>
-			Save Config
+			{$t('acls.saveConfig')}
 		</button>
 		<button disabled={loading || editing} class="btn-sm rounded-md variant-filled-secondary disabled:opacity-50 w-32" onclick={() => { loadConfig() }}>
-			Load Config
+			{$t('acls.loadConfig')}
 		</button>
 		<button 
             disabled={loading}
@@ -105,18 +106,18 @@
             }}
         >
             {#if editing}
-                Apply Config
+                {$t('acls.applyConfig')}
             {:else}
-                Edit Config
+                {$t('acls.editConfig')}
             {/if}
 		</button>
         {#if editing}
             <button disabled={loading} class="btn-sm rounded-md variant-filled-error disabled:opacity-50 w-32" onclick={() => { editing = false }}>
-                Cancel Editing
+                {$t('acls.cancelEditing')}
             </button>
         {:else}
             <button disabled={loading || editing} class="btn-sm rounded-md variant-filled-error disabled:opacity-50 w-32" onclick={() => { resetConfig() }}>
-                Reset Config
+                {$t('acls.resetConfig')}
             </button>
         {/if}
 		<!--button disabled={loading} class="btn-sm rounded-md variant-filled-success" onclick={() => { if(aclEditJSON !== undefined) applyConfig(aclEditJSON) }}>

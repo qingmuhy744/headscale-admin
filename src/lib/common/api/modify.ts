@@ -1,3 +1,4 @@
+import { translate } from '$lib/i18n';
 import type {
 	ApiNode,
 	ApiPolicy,
@@ -45,7 +46,7 @@ export async function expireNode(n: Node): Promise<Node> {
 }
 
 export async function setNodeTags(n: Node, tags: string[]): Promise<Node> {
-	if (tags.length === 0) throw new Error('Tagged nodes must retain at least one tag');
+	if (tags.length === 0) throw new Error(translate('ui.taggedNodesMustRetainAtLeastOneTag'));
 	const path = `${API_URL_NODE}/${n.id}/tags`;
 	tags = tags.map((tag) => (tag.startsWith('tag:') ? tag : 'tag:' + tag));
 	const { node } = await apiPost<ApiNode>(path, { tags });
@@ -100,11 +101,11 @@ export async function setPolicy(acl: ACLBuilder) {
 
 export async function refreshApiKey() {
 	const oldKey = (await getApiKeys()).find((key) => matchesApiKey(key, App.apiKey.value));
-	if (!oldKey) throw new Error('Current API key was not found');
+	if (!oldKey) throw new Error(translate('ui.currentApiKeyWasNotFound'));
 	const apiKeyNew = await createApiKey();
 	const verifiedKeys = await getApiKeys({ headers: { Authorization: `Bearer ${apiKeyNew}` } });
 	if (!verifiedKeys.some((key) => matchesApiKey(key, apiKeyNew))) {
-		throw new Error('New API key could not be verified');
+		throw new Error(translate('ui.newApiKeyCouldNotBeVerified'));
 	}
 	// Switch before revocation so a failed response cannot strand the browser on an expired key.
 	App.apiKey.value = apiKeyNew;
@@ -114,6 +115,6 @@ export async function refreshApiKey() {
 	try {
 		await expireApiKey(oldKey.id);
 	} catch (error) {
-		throw new Error(`New key is active, but the previous key could not be expired: ${error}`);
+		throw new Error(translate('ui.newKeyIsActiveButThePreviousKeyCouldNotBeExpiredValue', { values: { v0: String(error) } }));
 	}
 }
