@@ -42,7 +42,7 @@ LABEL org.opencontainers.image.source="https://github.com/qingmuhy744/headscale-
       org.opencontainers.image.description="Headscale Admin compatible with Headscale v0.29.2" \
       org.opencontainers.image.licenses="GPL-3.0-only" \
       org.opencontainers.image.url="https://github.com/qingmuhy744/headscale-admin" \
-      org.opencontainers.image.version="0.29.2-5"
+      org.opencontainers.image.version="0.29.2-6"
 
 WORKDIR /app
 

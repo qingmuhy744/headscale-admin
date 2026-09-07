@@ -14,7 +14,7 @@ Existing theme and light/dark preferences remain selected after upgrade. Languag
 and theme changes in Settings take effect immediately and persist across reloads.
 Translations reference [serein-213/headscale-admin-il18n](https://github.com/serein-213/headscale-admin-il18n)
 at commit `07cf626`; its API implementation is not imported.
-Frontend release `hs-0.29.2-5` adds a header language menu synchronized with Settings,
+Frontend release `hs-0.29.2-6` adds a header language menu synchronized with Settings,
 clearer Claude list boundaries, and matching light/dark policy viewing and editing
 colors. Policy copy feedback follows the selected language.
 
@@ -92,17 +92,17 @@ It runs checks, unit tests, a real backend and browser tests before publishing.
 Push a version tag to publish both `linux/amd64` and `linux/arm64`:
 
 ```sh
-git tag hs-0.29.2-5
-git push origin hs-0.29.2-5
+git tag hs-0.29.2-6
+git push origin hs-0.29.2-6
 ```
 
 To retry publishing an existing tag without moving it:
 
 ```sh
-gh workflow run docker-build.yml --ref main -f release_tag=hs-0.29.2-5
+gh workflow run docker-build.yml --ref main -f release_tag=hs-0.29.2-6
 ```
 
-The artifact is `ghcr.io/qingmuhy744/headscale-admin:hs-0.29.2-5`.
+The artifact is `ghcr.io/qingmuhy744/headscale-admin:hs-0.29.2-6`.
 The package must be public for an unauthenticated mirror to fetch it.
 Record the release digest and source revision before deploying. Release tags
 should be immutable; use a new suffix for subsequent changes.
@@ -112,7 +112,7 @@ should be immutable; use a new suffix for subsequent changes.
 Keep this short image name in the server's Compose file:
 
 ```yaml
-image: qingmuhy744/headscale-admin:hs-0.29.2-5
+image: qingmuhy744/headscale-admin:hs-0.29.2-6
 ```
 
 The configured `docker.1ms.run` mirror returned `not found` when pulling this short
@@ -121,8 +121,8 @@ as described in its [registry mapping documentation](https://mdoc.cc/mliev/1ms/v
 Pull through that domestic endpoint, then tag the same image with the short name:
 
 ```sh
-sudo docker pull ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-5
-sudo docker tag ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-5 qingmuhy744/headscale-admin:hs-0.29.2-5
+sudo docker pull ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-6
+sudo docker tag ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-6 qingmuhy744/headscale-admin:hs-0.29.2-6
 ```
 
 Compare the downloaded image identity and `org.opencontainers.image.revision`

@@ -19,14 +19,17 @@ test('defaults to Chinese and light Claude, and remembers language and theme cha
   await expect(page.locator('html')).not.toHaveClass(/dark/);
   await expect(page.locator('body')).toHaveAttribute('data-theme', 'claude');
   await expect(page.locator('#theme-selector')).toHaveValue('claude');
-  await page.locator('#language-selector').selectOption('en');
+  await page.getByRole('combobox', { name: '切换语言', exact: true }).selectOption('en');
+  await expect(page.locator('#language-selector')).toHaveValue('en');
   await expect(page.getByRole('main').getByText('Settings', { exact: true })).toBeVisible();
   await page.locator('#theme-selector').selectOption('wintry');
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(page.getByRole('combobox', { name: 'Change language', exact: true })).toHaveValue('en');
   await expect(page.locator('body')).toHaveAttribute('data-theme', 'wintry');
   await page.locator('#theme-selector').selectOption('claude');
   await page.locator('#language-selector').selectOption('zh-CN');
+  await expect(page.getByRole('combobox', { name: '切换语言', exact: true })).toHaveValue('zh-CN');
   await page.getByRole('switch', { name: 'Light Switch', exact: true }).click();
   await expect(page.locator('html')).toHaveClass(/dark/);
   await page.reload();

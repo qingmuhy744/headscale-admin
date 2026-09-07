@@ -1,6 +1,6 @@
 # headscale-admin
 
-This fork targets **Headscale v0.29.2**. Its image tag is `hs-0.29.2-5`,
+This fork targets **Headscale v0.29.2**. Its image tag is `hs-0.29.2-6`,
 published to GitHub Container Registry under `qingmuhy744/headscale-admin`.
 See [compatibility, local acceptance, publishing and rollback](docs/headscale-0.29.2.md)
 for this fork's deployment instructions. The upstream documentation follows below.

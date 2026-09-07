@@ -45,7 +45,7 @@ test('creates user and tag keys, shows secrets once, then expires and deletes th
   for (const mode of ['User', 'Tags']) {
     await page.getByRole('button', { name: 'Create key', exact: true }).click();
     await page.getByRole('radio', { name: mode, exact: true }).check();
-    if (mode === 'User') await page.getByRole('combobox').selectOption(env.TEST_USER_ID);
+    if (mode === 'User') await page.locator('form').getByRole('combobox', { name: /^User/ }).selectOption(env.TEST_USER_ID);
     else {
       await page.getByRole('textbox', { name: 'Key tags', exact: true }).fill('test');
       await page.getByRole('textbox', { name: 'Key tags', exact: true }).press('Enter');
