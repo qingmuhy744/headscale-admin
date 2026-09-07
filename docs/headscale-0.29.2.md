@@ -125,6 +125,18 @@ sudo docker pull ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-6
 sudo docker tag ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-6 qingmuhy744/headscale-admin:hs-0.29.2-6
 ```
 
+If the mirror reports a missing `application/vnd.in-toto+json` build attestation,
+pull the matching platform manifest directly. The `linux/amd64` manifest for
+`hs-0.29.2-6` was verified against GHCR and deployed with:
+
+```sh
+sudo docker pull --platform linux/amd64 ghcr.1ms.run/qingmuhy744/headscale-admin@sha256:6cde1588dd0762a9bab0b605cae85b7f43c53f65d98cceac44b1e4bc7132bcab
+sudo docker tag ghcr.1ms.run/qingmuhy744/headscale-admin@sha256:6cde1588dd0762a9bab0b605cae85b7f43c53f65d98cceac44b1e4bc7132bcab qingmuhy744/headscale-admin:hs-0.29.2-6
+```
+
+For another release or architecture, obtain its platform manifest digest from
+GHCR first. A direct platform pull records that manifest digest as its image identity.
+
 Compare the downloaded image identity and `org.opencontainers.image.revision`
 with the published release and the source commit of its tag before deploying.
 Retain the release index, platform manifest and source revision in the rollout record.
