@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
 	import Navigation from '$lib/Navigation.svelte';
+	import LanguageSwitcher from '$lib/parts/LanguageSwitcher.svelte';
 	import RawMdiGithub from '~icons/mdi/github';
 	import RawMdiMenu from '~icons/mdi/menu';
 	import '../app.postcss';
@@ -73,8 +74,9 @@
 		<AppBar
 			gridColumns="grid-cols-[minmax(0,1fr)_auto]"
 			gap="gap-2 sm:gap-4"
+			padding="p-2 sm:p-4"
 			slotDefault="hidden"
-			slotTrail="space-x-2 sm:space-x-4"
+			slotTrail="space-x-1 sm:space-x-4"
 		>
 			<svelte:fragment slot="lead">
 				<div class="flex min-w-0 items-center gap-2">
@@ -96,16 +98,17 @@
 			</svelte:fragment>
 
 			<svelte:fragment slot="trail">
-				<LightSwitch title={$t('ui.toggleLightOrDarkMode')} />
+				<LanguageSwitcher />
+				<LightSwitch title={$t('ui.toggleLightOrDarkMode')} width="w-10 sm:w-12" height="h-5 sm:h-6" />
 				<a
-					class="btn btn-sm variant-ghost-surface"
+					class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-sm variant-ghost-surface sm:w-auto sm:gap-2 sm:px-3"
 					aria-label="GitHub"
 					title="GitHub"
 					href="https://github.com/qingmuhy744/headscale-admin"
 					target="_blank"
 					rel="noreferrer"
 				>
-					<RawMdiGithub class="shrink-0 sm:mr-2" />
+					<RawMdiGithub class="h-4 w-4 shrink-0" />
 					<span class="hidden sm:inline">GitHub</span>
 				</a>
 			</svelte:fragment>

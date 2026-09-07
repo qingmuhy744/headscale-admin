@@ -84,7 +84,7 @@
 </script>
 
 <CardListPage>
-	<div class="mb-2">
+	<div class="mb-2 flex flex-wrap gap-2">
 		<button disabled={loading || editing} class="btn-sm rounded-md variant-filled-success disabled:opacity-50 w-32" onclick={() => { 
             saveConfig(acl, ToastStore, {setLoadingTrue: () => { loading = true}, setLoadingFalse: ()=> { loading = false }})
         }}>
@@ -125,9 +125,15 @@
 		</button-->
 	</div>
     {#if !editing}
-    <CodeBlock language="json" code={aclJSON} />
+    <CodeBlock
+        class="acl-config-code"
+        language="json"
+        code={aclJSON}
+        buttonLabel={$t('common.copy')}
+        buttonCopied={$t('common.copied')}
+    />
     {:else}
-    <div class={isLightMode ? "" : "jse-theme-dark" }>
+    <div class={`acl-config-code ${isLightMode ? "" : "jse-theme-dark"}`}>
     <JSONEditor parser={JWCC} mode={Mode.text} tabSize={4} bind:content={aclEditJSON} onChange={(updatedContent) => {
         if(isTextContent(updatedContent)){
             aclEditJSON = updatedContent

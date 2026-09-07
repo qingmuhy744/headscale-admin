@@ -44,3 +44,160 @@ body {
 	src: url('/fonts/PlayfairDisplay-Italic.ttf');
 	font-display: swap;
 }
+
+/* Keep each Claude list item distinct without framing its details twice. */
+[data-theme='claude'] .accordion-item {
+	border: 1px solid rgb(var(--color-surface-400));
+	border-radius: 8px;
+	background-color: rgb(var(--color-surface-50));
+}
+
+[data-theme='claude'] .accordion-item + .accordion-item {
+	margin-top: 12px;
+}
+
+[data-theme='claude'] .accordion-item > .accordion-control {
+	border-radius: 7px !important;
+	border-bottom: 1px solid transparent;
+	background-color: rgb(var(--color-surface-100));
+}
+
+[data-theme='claude'] .accordion-item > .accordion-control[aria-expanded='true'] {
+	border-bottom-color: rgb(var(--color-surface-300));
+	border-bottom-left-radius: 0 !important;
+	border-bottom-right-radius: 0 !important;
+}
+
+[data-theme='claude'] .accordion-item > .accordion-control:hover {
+	background-color: rgb(var(--color-surface-200));
+}
+
+[data-theme='claude'] .accordion-item > .accordion-control:focus-visible {
+	outline: 2px solid rgb(var(--color-primary-500));
+	outline-offset: -3px;
+}
+
+[data-theme='claude'] .accordion-panel .card-list-content {
+	border-radius: 0;
+	background: transparent;
+}
+
+[data-theme='claude'] .node-route-row {
+	font-weight: 400;
+}
+
+.dark [data-theme='claude'] .accordion-item {
+	border-color: rgb(var(--color-surface-600));
+	background-color: rgb(var(--color-surface-900));
+}
+
+.dark [data-theme='claude'] .accordion-item > .accordion-control {
+	background-color: rgb(var(--color-surface-800));
+}
+
+.dark [data-theme='claude'] .accordion-item > .accordion-control[aria-expanded='true'] {
+	border-bottom-color: rgb(var(--color-surface-600));
+}
+
+.dark [data-theme='claude'] .accordion-item > .accordion-control:hover {
+	background-color: rgb(var(--color-surface-700));
+}
+
+/* Share syntax colors between the highlighted policy and the JSON editor. */
+[data-theme='claude'] .acl-config-code {
+	--code-background: rgb(var(--color-surface-50));
+	--code-panel: rgb(var(--color-surface-100));
+	--code-border: rgb(var(--color-surface-400));
+	--code-text: rgb(var(--color-surface-900));
+	--code-muted: rgb(var(--color-surface-600));
+	--code-key: rgb(var(--color-primary-600));
+	--code-string: rgb(var(--color-secondary-600));
+	--code-number: rgb(var(--color-tertiary-600));
+	--code-highlight: rgb(var(--color-surface-200));
+	--jse-background-color: var(--code-background);
+	--jse-text-color: var(--code-text);
+	--jse-main-border: 1px solid var(--code-border);
+	--jse-theme-color: var(--code-panel);
+	--jse-theme-color-highlight: var(--code-highlight);
+	--jse-menu-color: var(--code-text);
+	--jse-panel-background: var(--code-panel);
+	--jse-panel-color: var(--code-muted);
+	--jse-panel-color-readonly: var(--code-muted);
+	--jse-panel-border: var(--jse-main-border);
+	--jse-panel-button-color-highlight: var(--code-text);
+	--jse-panel-button-background-highlight: var(--code-highlight);
+	--jse-key-color: var(--code-key);
+	--jse-value-color: var(--code-text);
+	--jse-value-color-string: var(--code-string);
+	--jse-value-color-url: var(--code-string);
+	--jse-value-color-number: var(--code-number);
+	--jse-value-color-boolean: var(--code-number);
+	--jse-value-color-null: var(--code-number);
+	--jse-delimiter-color: var(--code-muted);
+	--jse-selection-background-color: var(--code-highlight);
+	--jse-selection-background-inactive-color: var(--code-panel);
+	--jse-hover-background-color: var(--code-highlight);
+	--jse-active-line-background-color: var(--code-panel);
+}
+
+.dark [data-theme='claude'] .acl-config-code {
+	--code-background: rgb(var(--color-surface-900));
+	--code-panel: rgb(var(--color-surface-800));
+	--code-border: rgb(var(--color-surface-600));
+	--code-text: rgb(var(--color-surface-100));
+	--code-muted: rgb(var(--color-surface-300));
+	--code-key: rgb(var(--color-primary-300));
+	--code-string: rgb(var(--color-secondary-300));
+	--code-number: rgb(var(--color-tertiary-300));
+	--code-highlight: rgb(var(--color-surface-700));
+}
+
+[data-theme='claude'] .acl-config-code.codeblock {
+	border: 1px solid var(--code-border);
+	background: var(--code-background);
+	color: var(--code-text);
+	box-shadow: none;
+}
+
+[data-theme='claude'] .acl-config-code .codeblock-header {
+	border-bottom: 1px solid var(--code-border);
+	background: var(--code-panel);
+	color: var(--code-muted);
+}
+
+[data-theme='claude'] .acl-config-code .codeblock-btn {
+	min-width: 80px;
+	height: 32px;
+	border: 1px solid var(--code-border);
+	background: var(--code-background);
+	color: var(--code-text) !important;
+}
+
+[data-theme='claude'] .acl-config-code .codeblock-btn:hover {
+	background: var(--code-highlight);
+}
+
+[data-theme='claude'] .acl-config-code .codeblock-btn:focus-visible {
+	outline: 2px solid rgb(var(--color-primary-500));
+	outline-offset: 2px;
+}
+
+[data-theme='claude'] .acl-config-code .codeblock-pre {
+	padding-top: 16px;
+}
+
+[data-theme='claude'] .acl-config-code :is(.hljs-punctuation, .hljs-comment) {
+	color: var(--code-muted);
+}
+
+[data-theme='claude'] .acl-config-code .hljs-attr {
+	color: var(--code-key);
+}
+
+[data-theme='claude'] .acl-config-code .hljs-string {
+	color: var(--code-string);
+}
+
+[data-theme='claude'] .acl-config-code :is(.hljs-number, .hljs-literal) {
+	color: var(--code-number);
+}

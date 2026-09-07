@@ -63,7 +63,7 @@
 	</div>
 	{#if childBottom === undefined}
 		{#each node.availableRoutes as route}
-			<div class="grid grid-cols-12 col-span-12 font-thin">
+			<div class="node-route-row grid grid-cols-12 col-span-12 font-thin">
 				<NodeRoute {route} disable={loading} {node} />
 			</div>
 		{/each}
