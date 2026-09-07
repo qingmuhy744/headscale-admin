@@ -120,10 +120,11 @@ image: qingmuhy744/headscale-admin:hs-0.29.2-7
 The configured `docker.1ms.run` mirror returned `not found` when pulling this short
 name. Millisecond Mirror uses a separate `ghcr.1ms.run` endpoint for GitHub packages,
 as described in its [registry mapping documentation](https://mdoc.cc/mliev/1ms/v1.0.0/3).
-Pull through that domestic endpoint, then tag the same image with the short name:
+Pull the server's `linux/amd64` platform through that domestic endpoint, then tag
+the same image with the short name:
 
 ```sh
-sudo docker pull ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-7
+sudo docker pull --platform linux/amd64 ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-7
 sudo docker tag ghcr.1ms.run/qingmuhy744/headscale-admin:hs-0.29.2-7 qingmuhy744/headscale-admin:hs-0.29.2-7
 ```
 
