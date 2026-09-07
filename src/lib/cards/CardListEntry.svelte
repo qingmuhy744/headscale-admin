@@ -43,6 +43,8 @@
 		</div>
 	</div>
 	{#if childBottom}
-		{@render childBottom()}
+		<div class="col-span-12 min-w-0">
+			{@render childBottom()}
+		</div>
 	{/if}
 </div>

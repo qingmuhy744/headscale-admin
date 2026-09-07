@@ -19,7 +19,7 @@
 </script>
 
 <div data-testid="preauth-key-{preAuthKey.id}" class="flex flex-wrap items-start justify-between gap-3 py-4 w-full min-w-0">
-	<div class="min-w-0 flex-1 space-y-2">
+	<div class="min-w-0 grow basis-64 space-y-2">
 		<div class="flex items-start gap-2">
 			<code class="break-all text-sm">{preAuthKey.key}</code>
 			<button type="button" class="btn-icon btn-icon-sm shrink-0" aria-label="Copy pre-auth key"
@@ -37,7 +37,7 @@
 			<span>{preAuthKey.expiration && !preAuthKey.expiration.startsWith('0001-') ? new Date(preAuthKey.expiration).toLocaleString() : 'No expiry'}</span>
 		</div>
 	</div>
-	<div class="flex items-center shrink-0">
+	<div class="ml-auto flex max-w-full flex-wrap items-center justify-end gap-y-2 shrink-0">
 		{#if !expired}
 			<Delete title="Expire key" icon={RawMdiClock} func={async () => {
 				await expirePreAuthKey(preAuthKey);
